@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NEWS | FC TRIDENT TOKYO</title>
+<meta name="description" content="FC TRIDENT TOKYO 公式サイト。FOOTBALL 7 SOCIETY LEAGUE 関東リーグ所属のソサイチチームです。">
+<link rel="icon" href="emblem.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="proto">試作版です。点線の「仮」がついた内容はダミーで、実際の情報に差し替えます。</div>
+
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="index.html" aria-label="FC TRIDENT TOKYO トップ">
+      <img class="emblem" src="emblem.webp" alt="">
+      <span class="brand-name">FC TRIDENT<small>TOKYO SOCIETY</small></span>
+    </a>
+    <nav class="nav" aria-label="メインメニュー">
+      <a href="news.html" aria-current="page">News<small>お知らせ</small></a>
+      <a href="match.html">Match<small>試合情報</small></a>
+      <a href="members.html">Members<small>メンバー</small></a>
+      <a href="gallery.html">Gallery<small>ギャラリー</small></a>
+      <a href="club.html">Club<small>クラブ概要</small></a>
+      <a href="contact.html">Contact<small>お問い合わせ</small></a>
+      <a class="nav-cta" href="sponsor.html">Partner<small>スポンサー募集</small></a>
+    </nav>
+    <details class="menu">
+      <summary>MENU</summary>
+      <div class="menu-panel">
+        <a href="index.html">トップ</a>
+        <a href="news.html" aria-current="page">お知らせ</a>
+        <a href="match.html">試合情報</a>
+        <a href="members.html">メンバー</a>
+        <a href="gallery.html">ギャラリー</a>
+        <a href="club.html">クラブ概要</a>
+        <a href="contact.html">お問い合わせ</a>
+        <a href="sponsor.html">スポンサー募集</a>
+      </div>
+    </details>
+  </div>
+</header>
+
+<main>
+  <section class="page-head">
+    <div class="wrap">
+      <p class="crumb"><a href="index.html">Top</a> / News</p>
+      <p class="eyebrow">News</p>
+      <h1>お知らせ</h1>
+      <p class="lead">試合結果、選手の加入、イベントなど、チームの最新情報をお届けします。</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap">
+      <div class="filters" role="group" aria-label="カテゴリで絞り込む">
+        <button type="button" data-filter="all" aria-pressed="true">すべて</button>
+        <button type="button" data-filter="match" aria-pressed="false">試合</button>
+        <button type="button" data-filter="club" aria-pressed="false">クラブ</button>
+        <button type="button" data-filter="partner" aria-pressed="false">スポンサー</button>
+      </div>
+      <ul class="news" id="news-list">
+        <li data-cat="match"><a href="match.html"><time datetime="2026-10-12">2026.10.12</time><span class="cat match">試合</span><span class="news-title">10/24（土）South Tokyo FCとの首位決戦のお知らせ</span></a></li>
+        <li data-cat="match"><a href="match.html"><time datetime="2026-10-10">2026.10.10</time><span class="cat match">試合</span><span class="news-title">第8戦 宮前スカーヴァティー戦 9-2で勝利、開幕8連勝</span></a></li>
+        <li data-cat="club"><a href="news.html"><time datetime="2026-09-28">2026.09.28</time><span class="cat club">クラブ</span><span class="news-title">公式ホームページを公開しました<span class="tag-temp">仮</span></span></a></li>
+        <li data-cat="match"><a href="match.html"><time datetime="2026-09-26">2026.09.26</time><span class="cat match">試合</span><span class="news-title">第7戦 FC金沢戦 13-0で勝利</span></a></li>
+        <li data-cat="partner"><a href="sponsor.html"><time datetime="2026-09-01">2026.09.01</time><span class="cat partner">スポンサー</span><span class="news-title">スポンサーの募集を開始しました<span class="tag-temp">仮</span></span></a></li>
+        <li data-cat="match"><a href="match.html"><time datetime="2026-08-22">2026.08.22</time><span class="cat match">試合</span><span class="news-title">第6戦 FC.全力de蹴球戦 4-0で勝利</span></a></li>
+      </ul>
+    </div>
+  </section>
+</main>
+<script>
+  (function () {
+    var buttons = document.querySelectorAll('[data-filter]');
+    var items = document.querySelectorAll('#news-list li');
+    buttons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var f = btn.getAttribute('data-filter');
+        buttons.forEach(function (b) { b.setAttribute('aria-pressed', String(b === btn)); });
+        items.forEach(function (li) { li.hidden = !(f === 'all' || li.getAttribute('data-cat') === f); });
+      });
+    });
+  })();
+</script>
+
+<section class="join">
+  <div class="wrap">
+    <div>
+      <p class="kicker">Join us</p>
+      <h2>一緒にプレーする仲間を募集中</h2>
+      <p>練習参加・対戦のご依頼・スポンサーのご相談はこちらから。</p>
+    </div>
+    <a class="btn btn-yellow" href="contact.html">お問い合わせ <span class="arrow">→</span></a>
+  </div>
+</section>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="foot-big" aria-hidden="true">FC TRIDENT TOKYO</div>
+    <div class="foot-grid">
+      <div>
+        <a class="brand" href="index.html"><img class="emblem" src="emblem.webp" alt=""><span class="brand-name">FC TRIDENT<small>TOKYO SOCIETY</small></span></a>
+        <p>活動場所：東京都内（詳細はここに入ります）<span class="tag-temp">仮</span></p>
+      </div>
+      <nav class="foot-links" aria-label="フッターメニュー">
+        <a href="index.html">トップ</a><a href="news.html">お知らせ</a><a href="match.html">試合情報</a>
+        <a href="members.html">メンバー</a><a href="gallery.html">ギャラリー</a><a href="sponsor.html">スポンサー募集</a>
+        <a href="club.html">クラブ概要</a><a href="contact.html">お問い合わせ</a>
+        <a href="https://www.instagram.com/fctridenttokyo_society/" target="_blank" rel="noopener">Instagram</a>
+      </nav>
+    </div>
+    <p class="copy"><span>© 2026 FC TRIDENT TOKYO</span><span>TOKYO / JAPAN</span></p>
+  </div>
+</footer>
+</body>
+</html>

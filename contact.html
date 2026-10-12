@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>お問い合わせ | FC TRIDENT TOKYO</title>
+<meta name="description" content="FC TRIDENT TOKYO 公式サイト。FOOTBALL 7 SOCIETY LEAGUE 関東リーグ所属のソサイチチームです。">
+<link rel="icon" href="emblem.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="proto">試作版です。点線の「仮」がついた内容はダミーで、実際の情報に差し替えます。</div>
+
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="index.html" aria-label="FC TRIDENT TOKYO トップ">
+      <img class="emblem" src="emblem.webp" alt="">
+      <span class="brand-name">FC TRIDENT<small>TOKYO SOCIETY</small></span>
+    </a>
+    <nav class="nav" aria-label="メインメニュー">
+      <a href="news.html">News<small>お知らせ</small></a>
+      <a href="match.html">Match<small>試合情報</small></a>
+      <a href="members.html">Members<small>メンバー</small></a>
+      <a href="gallery.html">Gallery<small>ギャラリー</small></a>
+      <a href="club.html">Club<small>クラブ概要</small></a>
+      <a href="contact.html" aria-current="page">Contact<small>お問い合わせ</small></a>
+      <a class="nav-cta" href="sponsor.html">Partner<small>スポンサー募集</small></a>
+    </nav>
+    <details class="menu">
+      <summary>MENU</summary>
+      <div class="menu-panel">
+        <a href="index.html">トップ</a>
+        <a href="news.html">お知らせ</a>
+        <a href="match.html">試合情報</a>
+        <a href="members.html">メンバー</a>
+        <a href="gallery.html">ギャラリー</a>
+        <a href="club.html">クラブ概要</a>
+        <a href="contact.html" aria-current="page">お問い合わせ</a>
+        <a href="sponsor.html">スポンサー募集</a>
+      </div>
+    </details>
+  </div>
+</header>
+
+<main>
+  <section class="page-head">
+    <div class="wrap">
+      <p class="crumb"><a href="index.html">トップ</a> / お問い合わせ</p>
+      <p class="eyebrow">Contact</p>
+      <h1>お問い合わせ</h1>
+      <p class="lead">練習参加、対戦のご依頼、スポンサーのご相談など、お気軽にご連絡ください。</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap two">
+      <form class="form" id="contact-form" novalidate>
+        <fieldset class="field">
+          <legend>お問い合わせの種類<span class="req">必須</span></legend>
+          <div class="choices">
+            <label><input type="radio" name="kind" id="kind-join" value="join" checked> 練習参加</label>
+            <label><input type="radio" name="kind" id="kind-match" value="match"> 対戦のご依頼</label>
+            <label><input type="radio" name="kind" id="kind-sponsor" value="sponsor"> スポンサーについて</label>
+            <label><input type="radio" name="kind" id="kind-other" value="other"> その他</label>
+          </div>
+        </fieldset>
+        <div class="field"><label for="f-name">お名前<span class="req">必須</span></label><input id="f-name" name="name" autocomplete="name" required></div>
+        <div class="field" id="company-field" hidden><label for="f-company">会社名・店舗名</label><input id="f-company" name="company" autocomplete="organization"></div>
+        <div class="field"><label for="f-email">メールアドレス<span class="req">必須</span></label><input id="f-email" name="email" type="email" autocomplete="email" required></div>
+        <div class="field"><label for="f-body">内容</label><textarea id="f-body" name="body" placeholder="ポジションやサッカー歴、ご相談内容など"></textarea></div>
+        <button class="btn btn-yellow" type="submit">送信内容を確認する <span class="arrow">→</span></button>
+        <p class="form-note">試作版のため、このフォームはまだどこにも送信されません。公開時に送信の仕組み（Googleフォームなど）をつなぎます。</p>
+        <p class="form-done" id="form-done" hidden>試作版のため送信はされていません。入力内容はこのページを閉じると消えます。</p>
+      </form>
+      <div class="contact-side">
+        <div><b>練習参加</b><p>年齢・レベルの条件、参加費などがここに入ります。<span class="tag-temp">仮</span></p></div>
+        <div><b>対戦のご依頼</b><p>希望日時と会場の候補を書いてご連絡ください。</p></div>
+        <div><b>スポンサーについて</b><p>金額・内容はご相談に応じます。<a href="sponsor.html">スポンサー募集のページ</a>もご覧ください。</p></div>
+      </div>
+    </div>
+  </section>
+</main>
+<script>
+  (function () {
+    var form = document.getElementById('contact-form');
+    var company = document.getElementById('company-field');
+    var done = document.getElementById('form-done');
+    function sync() {
+      var v = form.querySelector('input[name="kind"]:checked').value;
+      company.hidden = v !== 'sponsor';
+    }
+    form.addEventListener('change', sync);
+    if (location.hash === '#sponsor') { document.getElementById('kind-sponsor').checked = true; }
+    sync();
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (!form.reportValidity()) return;
+      done.hidden = false;
+    });
+  })();
+</script>
+
+
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="foot-big" aria-hidden="true">FC TRIDENT TOKYO</div>
+    <div class="foot-grid">
+      <div>
+        <a class="brand" href="index.html"><img class="emblem" src="emblem.webp" alt=""><span class="brand-name">FC TRIDENT<small>TOKYO SOCIETY</small></span></a>
+        <p>活動場所：東京都内（詳細はここに入ります）<span class="tag-temp">仮</span></p>
+      </div>
+      <nav class="foot-links" aria-label="フッターメニュー">
+        <a href="index.html">トップ</a><a href="news.html">お知らせ</a><a href="match.html">試合情報</a>
+        <a href="members.html">メンバー</a><a href="gallery.html">ギャラリー</a><a href="sponsor.html">スポンサー募集</a>
+        <a href="club.html">クラブ概要</a><a href="contact.html">お問い合わせ</a>
+        <a href="https://www.instagram.com/fctridenttokyo_society/" target="_blank" rel="noopener">Instagram</a>
+      </nav>
+    </div>
+    <p class="copy"><span>© 2026 FC TRIDENT TOKYO</span><span>TOKYO / JAPAN</span></p>
+  </div>
+</footer>
+</body>
+</html>
