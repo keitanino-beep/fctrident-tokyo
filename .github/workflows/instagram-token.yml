@@ -16,6 +16,10 @@ jobs:
           IG_TOKEN: ${{ secrets.IG_TOKEN }}
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
+          if [ -z "$IG_TOKEN" ] || [ -z "$GH_TOKEN" ]; then
+            echo "IG_TOKEN または GH_PAT が未登録のため、今回はスキップしました"
+            exit 0
+          fi
           NEW=$(curl -fsS "https://graph.instagram.com/refresh_access_token?grant_type=ig_refresh_token&access_token=${IG_TOKEN}" | jq -r '.access_token')
           if [ -z "$NEW" ] || [ "$NEW" = "null" ]; then
             echo "トークンを更新できませんでした。Meta の開発者ページで新しいトークンを発行してください。"
