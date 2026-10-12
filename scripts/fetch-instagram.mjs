@@ -3,7 +3,11 @@
 import { mkdir, readdir, unlink, writeFile } from 'node:fs/promises';
 
 const token = process.env.IG_TOKEN;
-if (!token) throw new Error('IG_TOKEN が設定されていません（GitHub の Secrets を確認してください）');
+if (!token) {
+  // トークン登録前はエラーにせず終わる（失敗通知が毎回届かないように）
+  console.log('IG_TOKEN が未登録のため、今回はスキップしました（GitHub の Secrets に登録すると動き出します）');
+  process.exit(0);
+}
 
 const LIMIT = 6;
 const fields = 'id,caption,media_type,media_url,thumbnail_url,permalink,timestamp';
