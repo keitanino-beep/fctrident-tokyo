@@ -1,0 +1,7 @@
+{
+  "sponsors": [
+    { "name": "LiGA DiVeRTiDA", "url": "https://ligad.jp/", "logo": "partners/liga-divertida.png", "tier": "main", "plate": "light" },
+    { "name": "株式会社 Conext Markting", "url": "https://conextmarkting.com/", "logo": "partners/conext-markting.png", "tier": "general", "plate": "light" },
+    { "name": "就活フットサル", "url": "https://syukatsu-futsal.com/", "logo": "partners/shukatsu-futsal.jpg", "tier": "general", "plate": "dark" }
+  ]
+}
