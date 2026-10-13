@@ -459,6 +459,148 @@ td.pts { color: var(--yellow); }
 .ig-post.is-album::after { content: "ALBUM"; }
 .ig-note { font-size: 12px; color: var(--muted); margin-top: 12px; }
 
+/* ギャラリー：試合アルバム */
+.album-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.album { display: grid; background: var(--ink-2); text-decoration: none; border-top: 3px solid var(--red); transition: transform .25s; }
+a.album:hover { transform: translateY(-4px); }
+a.album:hover .album-cover img { transform: scale(1.05); }
+.album.is-empty { border-top-color: var(--line); }
+.album-cover { aspect-ratio: 16 / 10; position: relative; overflow: hidden; background: var(--ink-3); }
+.album-cover > img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s; }
+.album-vs {
+  display: flex; align-items: center; justify-content: center; gap: 18px;
+  background:
+    radial-gradient(60% 80% at 50% 0%, rgba(215,38,47,.25), transparent 70%),
+    repeating-linear-gradient(-55deg, rgba(255,255,255,.03) 0 2px, transparent 2px 12px),
+    var(--ink-3);
+}
+.album-vs img { width: 30%; max-width: 110px; height: auto; object-fit: contain; filter: drop-shadow(0 8px 14px rgba(0,0,0,.5)); }
+.album-vs img + span + img { background: #f3efeb; border-radius: 50%; padding: 6px; }
+.album-vs > span:not(.album-count) { font-family: var(--font-en); font-size: 26px; color: var(--muted); }
+.album-count {
+  position: absolute; left: 12px; bottom: 10px; font-family: var(--font-label); font-weight: 800; letter-spacing: .16em; font-size: 11px;
+  background: var(--ink); color: var(--paper); padding: 3px 10px;
+}
+.album.is-empty .album-count { color: var(--muted); }
+.album-info { padding: 18px 20px 20px; display: grid; gap: 6px; }
+.album-league { font-family: var(--font-label); font-weight: 700; letter-spacing: .1em; font-size: 11px; color: var(--muted); text-transform: uppercase; }
+.album-card-title { font-family: var(--font-en); font-weight: 400; font-size: 30px; line-height: 1.05; letter-spacing: .02em; }
+.album-card-title span, .album-title span { display: block; font-family: var(--font-jp); font-weight: 900; font-size: 15px; letter-spacing: .04em; margin-top: 6px; }
+.album-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 13px; color: var(--muted); margin-top: 4px; }
+.album-score-sm { font-family: var(--font-en); font-size: 18px; color: var(--paper); letter-spacing: .04em; }
+
+.album-head .album-league { color: rgba(246,242,238,.75); font-size: 13px; }
+.album-title { font-family: var(--font-en); font-weight: 400; font-size: clamp(48px, 8vw, 96px); line-height: .95; margin-top: 10px; }
+.album-title span { font-size: clamp(18px, 2.4vw, 24px); margin-top: 12px; }
+.album-score { display: flex; align-items: center; gap: 18px; margin-top: 26px; flex-wrap: wrap; }
+.album-score .crest { width: 64px; height: 64px; }
+.album-score .crest img { width: 76px; height: 76px; }
+.album-score .crest.them img { background: #f3efeb; border-radius: 50%; padding: 6px; width: 64px; height: 64px; }
+.album-score .score { font-size: 56px; }
+.album-body { display: grid; gap: 28px; }
+.album-facts { max-width: 760px; }
+.album-note { font-size: 17px; font-weight: 700; max-width: 40em; border-left: 4px solid var(--yellow); padding-left: 16px; }
+.album-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; }
+.photo-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.photo { aspect-ratio: 1; padding: 0; border: 0; cursor: zoom-in; overflow: hidden; background: var(--ink-3); display: block; }
+.photo img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .35s, filter .25s; }
+.photo:hover img { transform: scale(1.05); filter: brightness(1.1); }
+.album-nav { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 20px; }
+.album-nav-link { font-weight: 700; font-size: 14px; text-decoration: none; }
+.album-nav-link:hover { color: var(--yellow); }
+
+.lightbox {
+  position: fixed; inset: 0; z-index: 200; background: rgba(8,7,7,.94);
+  display: grid; grid-template-columns: 56px minmax(0, 1fr) 56px; align-items: center; gap: 8px; padding: 48px 12px;
+}
+.lightbox[hidden] { display: none !important; }
+.lightbox img { max-width: 100%; max-height: calc(100vh - 120px); margin: 0 auto; object-fit: contain; grid-column: 2; }
+.lightbox button { background: none; border: 0; color: var(--paper); font-size: 44px; line-height: 1; cursor: pointer; padding: 8px; }
+.lightbox button:hover { color: var(--yellow); }
+.lb-prev { grid-column: 1; grid-row: 1; }
+.lb-next { grid-column: 3; grid-row: 1; }
+.lightbox img { grid-row: 1; }
+.lb-close { position: absolute; top: 8px; right: 14px; font-size: 40px !important; }
+.lb-count { position: absolute; bottom: 14px; left: 0; right: 0; text-align: center; font-family: var(--font-label); font-weight: 700; letter-spacing: .16em; color: var(--muted); }
+
+.album-video {
+  position: absolute; right: 12px; bottom: 10px; font-family: var(--font-label); font-weight: 800; letter-spacing: .14em; font-size: 11px;
+  background: var(--red); color: var(--paper); padding: 3px 10px;
+}
+.album-empty { color: var(--muted); font-weight: 700; border: 1px dashed var(--line); padding: 28px; text-align: center; }
+
+/* 試合動画カード（Veo は埋め込み不可のため外部リンク） */
+.video-card {
+  position: relative; display: block; aspect-ratio: 16 / 9; max-height: 540px; width: 100%; overflow: hidden;
+  background: var(--ink-3); text-decoration: none; border-top: 3px solid var(--red);
+}
+.video-card > img { width: 100%; height: 100%; object-fit: cover; display: block; filter: brightness(.55); transition: transform .5s, filter .3s; }
+.video-card:hover > img { transform: scale(1.03); filter: brightness(.4); }
+.video-card::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgba(13,11,12,.85)); }
+.video-play {
+  position: absolute; z-index: 1; left: 50%; top: 45%; width: 92px; height: 92px; translate: -50% -50%;
+  border-radius: 50%; background: var(--red); box-shadow: 0 0 0 10px rgba(215,38,47,.25), 0 16px 40px rgba(0,0,0,.5); transition: transform .25s;
+}
+.video-play::before {
+  content: ""; position: absolute; left: 50%; top: 50%; translate: -35% -50%;
+  border-style: solid; border-width: 16px 0 16px 26px; border-color: transparent transparent transparent var(--paper);
+}
+.video-card:hover .video-play { transform: scale(1.08); }
+.video-text {
+  position: absolute; z-index: 1; left: 24px; bottom: 20px; display: grid; gap: 2px;
+  font-family: var(--font-jp); font-weight: 900; font-size: clamp(18px, 2.4vw, 26px); color: var(--paper);
+}
+.video-text small { font-family: var(--font-label); font-weight: 800; letter-spacing: .2em; font-size: 12px; color: var(--yellow); }
+.video-text em { font-style: normal; font-weight: 500; font-size: 12px; color: rgba(246,242,238,.75); }
+.video-vs { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 24px; filter: brightness(.6); }
+.video-vs img { width: 18%; max-width: 140px; }
+.video-vs img + b + img { background: #f3efeb; border-radius: 50%; padding: 8px; }
+.video-vs b { font-family: var(--font-en); font-weight: 400; font-size: 34px; color: var(--muted); }
+
+/* 選手募集 */
+.recruit-intro { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 48px; align-items: center; }
+.recruit-photo { margin: 0; position: relative; }
+.recruit-photo img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; clip-path: polygon(0 0, 100% 0, 100% 86%, 88% 100%, 0 100%); }
+.recruit-photo::after { content: ""; position: absolute; left: -14px; bottom: -14px; width: 40%; height: 40%; z-index: -1; background: repeating-linear-gradient(-55deg, var(--red) 0 3px, transparent 3px 12px); opacity: .7; }
+.recruit-title { font-family: var(--font-jp); font-weight: 900; font-size: clamp(26px, 3.4vw, 40px); line-height: 1.35; margin: 14px 0 18px; }
+.recruit-copy > p { color: rgba(246,242,238,.85); }
+.recruit-wants { list-style: none; margin: 22px 0 0; padding: 0; display: grid; gap: 10px; }
+.recruit-wants li { display: flex; gap: 12px; align-items: baseline; font-weight: 700; }
+.recruit-wants li::before { content: ""; flex: none; width: 14px; height: 4px; background: var(--yellow); transform: skewX(-30deg) translateY(-4px); }
+.recruit-positions { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.pos-card { background: var(--ink-2); border-top: 4px solid var(--red); padding: 22px 18px; display: grid; gap: 4px; }
+.pos-card b { font-family: var(--font-en); font-weight: 400; font-size: 40px; line-height: 1; letter-spacing: .03em; }
+.pos-card span { font-size: 13px; color: var(--muted); font-weight: 700; }
+.pos-card.gk { border-top-color: var(--green); }
+.pos-card.mgr { border-top-color: var(--yellow); }
+.recruit-note { color: var(--muted); font-size: 14px; margin-top: 16px; }
+.recruit-new { margin-top: 28px; background: var(--ink-2); border-left: 4px solid var(--yellow); padding: 20px 24px; display: grid; gap: 6px; }
+.recruit-new .kicker { font-family: var(--font-label); font-weight: 800; letter-spacing: .2em; font-size: 12px; color: var(--yellow); text-transform: uppercase; }
+.recruit-new b { color: var(--paper); }
+.recruit-new p:last-child { color: rgba(246,242,238,.8); font-size: 14px; }
+.recruit-photos { display: grid; gap: 12px; align-content: start; }
+.recruit-photos img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; display: block; }
+.recruit-lead { color: rgba(246,242,238,.85); margin-bottom: 22px; }
+.dm-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; }
+.dm-template {
+  margin: 0; background: var(--ink-2); border: 1px solid var(--line); border-top: 4px solid var(--yellow); padding: 24px 26px;
+  font-family: var(--font-jp); font-size: 15px; line-height: 2.1; white-space: pre-wrap; color: var(--paper); align-self: start;
+}
+.faq { display: grid; gap: 10px; max-width: 860px; }
+.faq details { background: var(--ink-2); border-left: 4px solid var(--red); }
+.faq summary { cursor: pointer; list-style: none; padding: 18px 22px; font-weight: 900; display: flex; justify-content: space-between; gap: 16px; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; font-family: var(--font-label); font-weight: 800; font-size: 22px; line-height: 1; color: var(--yellow); }
+.faq details[open] summary::after { content: "−"; }
+.faq details p { padding: 0 22px 18px; color: rgba(246,242,238,.85); }
+
+/* プライバシーポリシー・404 */
+.policy h2 { font-family: var(--font-jp); font-weight: 900; font-size: 18px; margin-top: 18px; padding-left: 12px; border-left: 4px solid var(--red); }
+.policy ul { margin: 0; padding-left: 1.4em; display: grid; gap: 6px; }
+.policy-meta { color: var(--muted); font-size: 13px; margin-top: 12px; }
+.notfound { min-height: 60vh; display: grid; align-content: center; }
+.notfound .eyebrow { font-size: clamp(120px, 24vw, 280px); }
+
 /* スポンサーページ */
 .reasons { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
 .reason { background: var(--ink-2); padding: 28px; display: grid; gap: 10px; align-content: start; border-top: 3px solid var(--red); }
@@ -473,12 +615,38 @@ td.pts { color: var(--yellow); }
 .flow li::before { content: "STEP " counter(step, decimal-leading-zero); font-family: var(--font-en); letter-spacing: .04em; color: var(--yellow); font-size: 22px; line-height: 1; }
 .flow b { font-size: 16px; font-weight: 900; }
 .flow span { font-size: 13px; color: var(--muted); padding-right: 12px; }
+/* 現在のスポンサー：白いプレートにロゴ（メインは横2枠） */
 .sponsor-logos { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
-.sponsor-logos div {
-  aspect-ratio: 3 / 2; background: var(--ink-2); display: grid; place-items: center; font-family: var(--font-label);
-  font-weight: 700; letter-spacing: .2em; font-size: 12px; color: var(--muted); text-align: center; padding: 8px; text-transform: uppercase;
+.partner-tile {
+  position: relative; display: grid; grid-template-rows: 1fr auto; place-items: center; gap: 10px;
+  height: 200px; padding: 30px 22px 16px; text-decoration: none; transition: transform .25s, box-shadow .25s;
 }
-.sponsor-logos div.open { background: transparent; border: 1px dashed var(--yellow); color: var(--yellow); }
+.partner-tile:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(0,0,0,.45); }
+.partner-tile img { width: 100%; height: 100px; object-fit: contain; }
+.partner-tile small { font-size: 12px; font-weight: 700; }
+.partner-tile.plate-light { background: #ffffff; color: #3a3236; }
+.partner-tile.plate-dark { background: #1c1b1c; color: var(--paper); box-shadow: inset 0 0 0 1px var(--line); }
+.partner-tile.is-main { grid-column: span 2; box-shadow: inset 0 4px 0 var(--yellow); }
+
+.partner-tile em {
+  position: absolute; left: 0; top: 0; font-style: normal; font-family: var(--font-label); font-weight: 800; letter-spacing: .16em; font-size: 11px;
+  background: var(--yellow); color: var(--ink); padding: 4px 10px;
+}
+.partner-tile.open { background: transparent; border: 1px dashed var(--yellow); color: var(--yellow); }
+.partner-tile.open span { font-family: var(--font-label); font-weight: 800; letter-spacing: .2em; font-size: 13px; text-transform: uppercase; }
+
+/* 全ページ下のパートナー帯 */
+.partner-band { background: #0a0909; border-top: 1px solid var(--line); padding-block: 28px; }
+.partner-band .wrap { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+.partner-band-label { font-family: var(--font-label); font-weight: 800; letter-spacing: .2em; font-size: 12px; color: var(--muted); text-transform: uppercase; }
+.partner-band-logos { display: flex; flex-wrap: wrap; gap: 10px; align-items: stretch; }
+.partner-chip { display: grid; place-items: center; width: 168px; height: 60px; padding: 8px 14px; transition: transform .2s; }
+.partner-chip:hover { transform: translateY(-2px); }
+.partner-chip img { width: 100%; height: 42px; object-fit: contain; }
+
+
+.partner-chip.plate-light { background: #ffffff; }
+.partner-chip.plate-dark { background: #1c1b1c; box-shadow: inset 0 0 0 1px var(--line); }
 
 /* クラブ概要 */
 .facts { display: grid; grid-template-columns: 11em minmax(0, 1fr); margin: 0; border-top: 1px solid var(--line); }
@@ -488,6 +656,7 @@ td.pts { color: var(--yellow); }
 .two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 64px; align-items: start; }
 .motto { font-family: var(--font-jp); font-weight: 900; font-size: clamp(28px, 4vw, 44px); line-height: 1.45; letter-spacing: .04em; }
 .motto em { font-style: normal; color: var(--yellow); }
+.motto-sub { font-weight: 900; font-size: clamp(16px, 2vw, 20px); color: var(--red); margin-top: 14px; letter-spacing: .04em; }
 .pillars { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 36px; }
 .pillars div { background: var(--ink-2); padding: 18px; border-top: 3px solid var(--red); display: grid; gap: 2px; }
 .pillars b { font-family: var(--font-en); font-size: 24px; letter-spacing: .04em; line-height: 1.1; }
@@ -510,10 +679,13 @@ fieldset.field { border: 0; padding: 0; margin: 0; }
   display: inline-flex; align-items: center; gap: 8px; background: var(--ink-2); padding: 11px 18px; cursor: pointer; font-weight: 700; font-size: 14px;
   clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
 }
+.choices label { white-space: nowrap; flex: 0 0 auto; }
 .choices label:has(input:checked) { background: var(--yellow); color: var(--ink); }
 .choices input { accent-color: var(--ink); }
 .form-note { font-size: 13px; color: var(--muted); }
 .form-done { border-left: 4px solid var(--yellow); background: var(--ink-2); padding: 16px 20px; font-weight: 700; }
+.form-error { border-left-color: var(--red); }
+#form-submit:disabled { opacity: .6; cursor: wait; }
 .contact-side { display: grid; gap: 14px; align-content: start; }
 .contact-side div { background: var(--ink-2); padding: 22px 24px; display: grid; gap: 6px; border-left: 4px solid var(--red); }
 .contact-side div:nth-child(3) { border-left-color: var(--yellow); }
@@ -558,6 +730,10 @@ fieldset.field { border: 0; padding: 0; margin: 0; }
   .members, .kits, .sponsor-logos, .flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 180px; }
   .ig-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .album-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .recruit-intro { grid-template-columns: minmax(0, 1fr); }
+  .recruit-positions { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .photo-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .reasons, .staff { grid-template-columns: minmax(0, 1fr); }
   .flow li { clip-path: none; }
   .page-head::after { width: 70px; right: 4%; }
@@ -569,7 +745,9 @@ fieldset.field { border: 0; padding: 0; margin: 0; }
   .hero-stats { grid-template-columns: minmax(0, 1fr); margin-top: 48px; }
   .hero-stats > div + div { border-left: 0; border-top: 1px solid rgba(246,242,238,.14); }
   .hero-badge { right: 0; }
-  .offers, .flow, .pillars { grid-template-columns: minmax(0, 1fr); }
+  .offers, .flow, .pillars, .album-grid { grid-template-columns: minmax(0, 1fr); }
+  .photo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .lightbox { grid-template-columns: 36px minmax(0, 1fr) 36px; padding-inline: 4px; }
   .news a { grid-template-columns: auto auto minmax(0, 1fr); gap: 8px 14px; }
   .news a::after { display: none; }
   .news-title { grid-column: 1 / -1; }
@@ -578,6 +756,10 @@ fieldset.field { border: 0; padding: 0; margin: 0; }
   .facts dt { border-bottom: 0; padding-bottom: 0; }
   .score { font-size: 48px; }
   .crest { width: 54px; height: 54px; font-size: 16px; }
+  .crest.us img, .crest.them img { width: 60px; height: 60px; }
+  .vs { gap: 10px; }
+  .vs .team { font-size: 12px; gap: 12px; }
+  .page-head::after { opacity: .3; }
   .match { padding: 22px 18px 18px; }
   .partner, .join .wrap { padding-block: 72px; }
 }
