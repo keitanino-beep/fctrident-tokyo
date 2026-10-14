@@ -683,7 +683,8 @@ foreach ($pos in $posNames.Keys) {
 </dialog>
 "@
     }
-    $cards += "<article class=`"member$(if ($p.profile) { ' has-profile' })`"><div class=`"member-photo $kind`">$photo<span class=`"num`">$($p.num)</span></div><div class=`"member-info`"><span class=`"member-tags`"><span class=`"$posCls`">$pos</span>$divTag</span><b>$(Esc $p.name)</b><span class=`"note`">$note</span></div>$open</article>"
+    $soon = if ($p.profile) { '' } else { '<span class="member-soon">PROFILE<b>COMING SOON</b></span>' }
+    $cards += "<article class=`"member$(if ($p.profile) { ' has-profile' })`"><div class=`"member-photo $kind`">$photo<span class=`"num`">$($p.num)</span>$soon</div><div class=`"member-info`"><span class=`"member-tags`"><span class=`"$posCls`">$pos</span>$divTag</span><b>$(Esc $p.name)</b><span class=`"note`">$note</span></div>$open</article>"
   }
   if ($cards.Count) {
     $memberGroups += "<div class=`"pos-head`"><h2>$pos</h2><span>$($posNames[$pos])</span></div>`n      <div class=`"members`">`n        $($cards -join "`n        ")`n      </div>"

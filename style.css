@@ -767,6 +767,14 @@ fieldset.field { border: 0; padding: 0; margin: 0; }
 .member-photo > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
 .member-photo::before { z-index: 1; }
 .member-photo .num { z-index: 2; }
+.member-soon {
+  position: absolute; left: 0; bottom: 14px; z-index: 2; display: grid; line-height: 1.15;
+  background: var(--ink); color: var(--muted); padding: 6px 16px 6px 12px;
+  font-family: var(--font-label); font-weight: 800; font-size: 10px; letter-spacing: .22em;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+}
+.member-soon b { font-family: var(--font-en); font-weight: 400; font-size: 18px; letter-spacing: .06em; color: var(--yellow); white-space: nowrap; }
+@media (max-width: 640px) { .member-soon { padding: 5px 12px 5px 10px; font-size: 9px; } .member-soon b { font-size: 13px; } }
 .member-tags { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .member-div { font-size: 10px; font-weight: 700; letter-spacing: .04em; color: var(--muted); padding: 1px 7px; box-shadow: inset 0 0 0 1px var(--line); }
 .member.has-profile { cursor: pointer; }
