@@ -48,8 +48,11 @@ $fonts = @'
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=CSSVER">
 '@
+# style.css を直したら URL を変えて、ブラウザに古い CSS を使わせない
+$cssVer = (Get-FileHash (Join-Path $root 'style.css') -Algorithm MD5).Hash.Substring(0, 8).ToLower()
+$fonts = $fonts.Replace('CSSVER', $cssVer)
 
 $join = @'
 <section class="join">
