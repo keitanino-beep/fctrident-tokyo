@@ -620,6 +620,98 @@ $scheduleBody = @"
 </script>
 "@
 
+# ---------- メンバー（_data/players.json ＋ photos/players/<背番号>_<名前>/）----------
+$pdata = [IO.File]::ReadAllText((Join-Path $root '_data\players.json'), $utf8) | ConvertFrom-Json
+$playerSrc = Join-Path $root 'photos\players'
+$playerOut = Join-Path $root 'players'
+$profLabels = [ordered]@{
+  career = '経歴'; skill = '得意なプレー'; goalFootball = '今シーズンの目標（サッカー）'; goalPrivate = '今シーズンの目標（プライベート）'
+  motto = '好きな言葉'; favorite = '好きなサッカー選手'
+}
+$posNames = [ordered]@{ GK = 'ゴールキーパー'; DF = 'ディフェンダー'; MF = 'ミッドフィルダー'; FW = 'フォワード' }
+$keepPlayers = @{}
+$memberGroups = @(); $profiles = @()
+foreach ($pos in $posNames.Keys) {
+  $cards = @()
+  foreach ($p in @($pdata.players | Where-Object { $_.pos -eq $pos })) {
+    $kind = if ($pos -eq 'GK') { 'gk' } else { 'fp' }
+    # 写真：フォルダの main.* を優先、なければファイル名順の1枚目
+    $photo = ''
+    $dir = if (Test-Path $playerSrc) { Get-ChildItem $playerSrc -Directory | Where-Object { $_.Name -match "^$($p.num)_" } | Select-Object -First 1 }
+    if ($dir) {
+      $imgs = @(Get-ChildItem $dir.FullName -File | Where-Object { $_.Extension -match '^\.(jpe?g|png)$' } | Sort-Object Name)
+      $main = $imgs | Where-Object { $_.BaseName -ieq 'main' } | Select-Object -First 1
+      if (-not $main -and $imgs.Count) { $main = $imgs[0] }
+      if ($main) {
+        New-Item -ItemType Directory -Force $playerOut | Out-Null
+        $dst = Join-Path $playerOut "$($p.num).jpg"
+        # 写真を差し替えたとき古い日付のファイルでも反映されるよう、毎回作り直す
+        if (Test-Path $dst) { Remove-Item $dst }
+        Save-Resized $main.FullName $dst 1000
+        $keepPlayers["$($p.num).jpg"] = $true
+        $photo = "<img src=`"players/$($p.num).jpg`" alt=`"$(Esc $p.name)`" loading=`"lazy`">"
+      }
+    }
+    $note = "$($p.goals)ゴール" + $(if ($p.note) { '・' + $p.note } else { '' })
+    $division = if ($p.division) { $p.division } else { $pdata.defaultDivision }
+    $divTag = if ($division) { "<span class=`"member-div`">$(Esc $division)</span>" } else { '' }
+    $posCls = if ($kind -eq 'gk') { 'pos gk' } else { 'pos' }
+    $open = ''
+    if ($p.profile) {
+      $open = "<button type=`"button`" class=`"member-open`" data-profile=`"p-$($p.num)`" aria-haspopup=`"dialog`"><span>プロフィールを見る</span></button>"
+      $dl = @()
+      if ($division) { $dl += "<dt>所属</dt><dd>$(Esc $division)</dd>" }
+      $dl += foreach ($k in $profLabels.Keys) { if ($p.profile.$k) { "<dt>$($profLabels[$k])</dt><dd>$(Esc $p.profile.$k)</dd>" } }
+      $msg = if ($p.profile.message) { "<p class=`"profile-msg`">$(Esc $p.profile.message)</p>" } else { '' }
+      $nick = if ($p.profile.nickname) { "<p class=`"profile-nick`">$(Esc $p.profile.nickname)</p>" } else { '' }
+      $profiles += @"
+<dialog class="profile" id="p-$($p.num)" aria-labelledby="p-$($p.num)-name">
+  <div class="profile-inner">
+    <button type="button" class="profile-close" aria-label="閉じる">×</button>
+    <div class="profile-photo member-photo $kind">$($photo.Replace(' loading="lazy"', ''))<span class="num">$($p.num)</span></div>
+    <div class="profile-body">
+      <p class="$posCls">$pos ・ $($posNames[$pos])</p>
+      <h3 id="p-$($p.num)-name">$(Esc $p.name)</h3>
+      $nick
+      $msg
+      <dl class="profile-dl">
+        $($dl -join "`n        ")
+      </dl>
+      <p class="profile-goals">関東リーグ 4部C <b>$($p.goals)</b> ゴール<small>（$($pdata.goalsAsOf)時点）</small></p>
+    </div>
+  </div>
+</dialog>
+"@
+    }
+    $cards += "<article class=`"member$(if ($p.profile) { ' has-profile' })`"><div class=`"member-photo $kind`">$photo<span class=`"num`">$($p.num)</span></div><div class=`"member-info`"><span class=`"member-tags`"><span class=`"$posCls`">$pos</span>$divTag</span><b>$(Esc $p.name)</b><span class=`"note`">$note</span></div>$open</article>"
+  }
+  if ($cards.Count) {
+    $memberGroups += "<div class=`"pos-head`"><h2>$pos</h2><span>$($posNames[$pos])</span></div>`n      <div class=`"members`">`n        $($cards -join "`n        ")`n      </div>"
+  }
+}
+# 消された写真の書き出しを消す
+if (Test-Path $playerOut) { Get-ChildItem $playerOut -File | Where-Object { -not $keepPlayers.ContainsKey($_.Name) } | Remove-Item }
+$profileScript = @'
+<script>
+  (function () {
+    var opener = null;
+    Array.prototype.forEach.call(document.querySelectorAll('.member-open'), function (b) {
+      b.addEventListener('click', function () {
+        var d = document.getElementById(b.getAttribute('data-profile'));
+        opener = b; d.showModal(); document.body.style.overflow = 'hidden';
+      });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('dialog.profile'), function (d) {
+      d.addEventListener('close', function () { document.body.style.overflow = ''; if (opener) opener.focus(); });
+      d.addEventListener('click', function (e) { if (e.target === d) d.close(); });
+      d.querySelector('.profile-close').addEventListener('click', function () { d.close(); });
+    });
+  })();
+</script>
+'@
+$membersHtml = ($memberGroups -join "`n`n      ")
+$membersExtra = ($profiles -join "`n") + "`n" + $profileScript
+
 # ---------- 各ページを書き出す ----------
 $pages = @('index.html') + ($nav | ForEach-Object { $_.file }) + @('privacy.html', '404.html')
 foreach ($file in $pages) {
@@ -632,6 +724,7 @@ foreach ($file in $pages) {
     continue
   }
   $part = [IO.File]::ReadAllText((Join-Path $root "_parts\$file"), $utf8)
+  if ($file -eq 'members.html') { $part = $part.Replace('<!--MEMBERS-->', $membersHtml).Replace('</main>', "</main>`n$membersExtra") }
   $m = [regex]::Match($part, '<!-- title: (.+?) -->')
   Write-Page $file $m.Groups[1].Value $part.Substring($m.Index + $m.Length).Trim() $file $descs[$file]
 }
