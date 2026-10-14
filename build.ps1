@@ -639,7 +639,7 @@ foreach ($pos in $posNames.Keys) {
     $photo = ''
     $dir = if (Test-Path $playerSrc) { Get-ChildItem $playerSrc -Directory | Where-Object { $_.Name -match "^$($p.num)_" } | Select-Object -First 1 }
     if ($dir) {
-      $imgs = @(Get-ChildItem $dir.FullName -File | Where-Object { $_.Extension -match '^\.(jpe?g|png)$' } | Sort-Object Name)
+      $imgs = @(Get-ChildItem $dir.FullName -File | Where-Object { $_.Extension -match '^\.(jpe?g|png|heic|heif)$' } | Sort-Object Name)
       $main = $imgs | Where-Object { $_.BaseName -ieq 'main' } | Select-Object -First 1
       if (-not $main -and $imgs.Count) { $main = $imgs[0] }
       if ($main) {
@@ -647,7 +647,21 @@ foreach ($pos in $posNames.Keys) {
         $dst = Join-Path $playerOut "$($p.num).jpg"
         # 写真を差し替えたとき古い日付のファイルでも反映されるよう、毎回作り直す
         if (Test-Path $dst) { Remove-Item $dst }
-        Save-Resized $main.FullName $dst 1000
+        $srcPath = $main.FullName
+        # iPhone の HEIC は System.Drawing で読めないので、Windows の画像機能でいったん JPEG にする
+        if ($main.Extension -match '^\.hei[cf]$') {
+          Add-Type -AssemblyName PresentationCore
+          $tmpDir = Join-Path $root '_build\heic'; New-Item -ItemType Directory -Force $tmpDir | Out-Null
+          $srcPath = Join-Path $tmpDir "$($p.num).jpg"
+          $in = [IO.File]::OpenRead($main.FullName)
+          try {
+            $dec = [Windows.Media.Imaging.BitmapDecoder]::Create($in, 'None', 'OnLoad')
+            $enc = New-Object Windows.Media.Imaging.JpegBitmapEncoder; $enc.QualityLevel = 92
+            $enc.Frames.Add([Windows.Media.Imaging.BitmapFrame]::Create($dec.Frames[0]))
+            $out = [IO.File]::Create($srcPath); try { $enc.Save($out) } finally { $out.Close() }
+          } finally { $in.Close() }
+        }
+        Save-Resized $srcPath $dst 1000
         $keepPlayers["$($p.num).jpg"] = $true
         $photo = "<img src=`"players/$($p.num).jpg`" alt=`"$(Esc $p.name)`" loading=`"lazy`">"
       }
