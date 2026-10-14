@@ -630,6 +630,7 @@ $profLabels = [ordered]@{
 }
 $posNames = [ordered]@{ GK = 'ゴールキーパー'; DF = 'ディフェンダー'; MF = 'ミッドフィルダー'; FW = 'フォワード' }
 $keepPlayers = @{}
+$photoJobs = @()
 $memberGroups = @(); $profiles = @()
 foreach ($pos in $posNames.Keys) {
   $cards = @()
@@ -644,9 +645,6 @@ foreach ($pos in $posNames.Keys) {
       if (-not $main -and $imgs.Count) { $main = $imgs[0] }
       if ($main) {
         New-Item -ItemType Directory -Force $playerOut | Out-Null
-        $dst = Join-Path $playerOut "$($p.num).jpg"
-        # 写真を差し替えたとき古い日付のファイルでも反映されるよう、毎回作り直す
-        if (Test-Path $dst) { Remove-Item $dst }
         $srcPath = $main.FullName
         # iPhone の HEIC は System.Drawing で読めないので、Windows の画像機能でいったん JPEG にする
         if ($main.Extension -match '^\.hei[cf]$') {
@@ -661,7 +659,7 @@ foreach ($pos in $posNames.Keys) {
             $out = [IO.File]::Create($srcPath); try { $enc.Save($out) } finally { $out.Close() }
           } finally { $in.Close() }
         }
-        Save-Resized $srcPath $dst 1000
+        $photoJobs += [pscustomobject]@{ num = $p.num; src = $srcPath; cutout = ($p.cutout -ne $false); cut = '' }
         $keepPlayers["$($p.num).jpg"] = $true
         $photo = "<img src=`"players/$($p.num).jpg`" alt=`"$(Esc $p.name)`" loading=`"lazy`">"
       }
@@ -703,6 +701,39 @@ foreach ($pos in $posNames.Keys) {
   if ($cards.Count) {
     $memberGroups += "<div class=`"pos-head`"><h2>$pos</h2><span>$($posNames[$pos])</span></div>`n      <div class=`"members`">`n        $($cards -join "`n        ")`n      </div>"
   }
+}
+# 背景の切り抜き（_build/rembg-venv があるときだけ。players.json で "cutout": false の選手は元の写真のまま）
+# 切り抜き結果は _build/cutout/<番号>.png に残し、元の写真が変わったときだけ作り直す
+$py = Join-Path $root '_build\rembg-venv\Scripts\python.exe'
+$cutDir = Join-Path $root '_build\cutout'
+$cutArgs = @(); $cutKeys = @()
+if (Test-Path $py) {
+  New-Item -ItemType Directory -Force $cutDir, (Join-Path $root '_build\cutout-src') | Out-Null
+  foreach ($j in $photoJobs | Where-Object { $_.cutout }) {
+    $norm = Join-Path $root "_build\cutout-src\$($j.num).jpg"
+    $png = Join-Path $cutDir "$($j.num).png"
+    $key = Join-Path $cutDir "$($j.num).src"
+    $stamp = "$($j.src)|$((Get-Item $j.src).LastWriteTimeUtc.Ticks)"
+    if (-not (Test-Path $png) -or -not (Test-Path $key) -or ([IO.File]::ReadAllText($key, $utf8) -ne $stamp)) {
+      if (Test-Path $norm) { Remove-Item $norm }
+      Save-Resized $j.src $norm 1600
+      $cutArgs += $norm, $png
+      $cutKeys += [pscustomobject]@{ key = $key; stamp = $stamp }
+    }
+    $j.cut = $png
+  }
+  if ($cutArgs.Count) {
+    & $py (Join-Path $root '_build\cutout.py') @cutArgs | Out-Null
+    if ($LASTEXITCODE) { throw '背景の切り抜きに失敗しました' }
+    foreach ($k in $cutKeys) { [IO.File]::WriteAllText($k.key, $k.stamp, $utf8) }
+  }
+}
+# 透明な部分は Save-Resized で白になる
+foreach ($j in $photoJobs) {
+  $dst = Join-Path $playerOut "$($j.num).jpg"
+  if (Test-Path $dst) { Remove-Item $dst }
+  $s = if ($j.cut -and (Test-Path $j.cut)) { $j.cut } else { $j.src }
+  Save-Resized $s $dst 1000
 }
 # 消された写真の書き出しを消す
 if (Test-Path $playerOut) { Get-ChildItem $playerOut -File | Where-Object { -not $keepPlayers.ContainsKey($_.Name) } | Remove-Item }

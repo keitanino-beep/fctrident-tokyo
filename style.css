@@ -766,6 +766,11 @@ fieldset.field { border: 0; padding: 0; margin: 0; }
 /* 選手の写真とプロフィール */
 .member-photo > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
 .member-photo::before { z-index: 1; }
+/* 白背景の写真：暗いグラデーションを外し、背番号をチームカラーの縁取りにする */
+.member-photo.fp:has(> img), .member-photo.gk:has(> img) { background: #fff; }
+.member-photo.fp:has(> img)::before, .member-photo.gk:has(> img)::before { background: linear-gradient(180deg, transparent 82%, rgba(13, 11, 12, .14)); }
+.member-photo:has(> img) .num { -webkit-text-stroke: 2px var(--red); }
+.member-photo.gk:has(> img) .num { -webkit-text-stroke-color: var(--green); }
 .member-photo .num { z-index: 2; }
 .member-soon {
   position: absolute; left: 0; bottom: 14px; z-index: 2; display: grid; line-height: 1.15;
