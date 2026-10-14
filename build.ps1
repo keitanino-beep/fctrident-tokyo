@@ -756,6 +756,19 @@ $profileScript = @'
 </script>
 '@
 $membersHtml = ($memberGroups -join "`n`n      ")
+
+# トップページのメンバー：ポジションごとに1人。写真のある選手を優先し、その中で得点の多い順
+$topMembers = foreach ($pos in $posNames.Keys) {
+  $p = @($pdata.players | Where-Object { $_.pos -eq $pos } |
+    Sort-Object @{ Expression = { $keepPlayers.ContainsKey("$($_.num).jpg") }; Descending = $true }, @{ Expression = { [int]$_.goals }; Descending = $true }) | Select-Object -First 1
+  if (-not $p) { continue }
+  $kind = if ($pos -eq 'GK') { 'gk' } else { 'fp' }
+  $posCls = if ($kind -eq 'gk') { 'pos gk' } else { 'pos' }
+  $img = if ($keepPlayers.ContainsKey("$($p.num).jpg")) { "<img src=`"players/$($p.num).jpg`" alt=`"$(Esc $p.name)`" loading=`"lazy`">" } else { '' }
+  $note = "$($p.goals)ゴール" + $(if ($p.note) { '・' + $p.note } else { '' })
+  "<a class=`"member`" href=`"members.html`"><div class=`"member-photo $kind`">$img<span class=`"num`">$($p.num)</span></div><div class=`"member-info`"><span class=`"$posCls`">$pos</span><b>$(Esc $p.name)</b><span class=`"note`">$note</span></div></a>"
+}
+$topMembersHtml = ($topMembers -join "`n        ")
 $membersExtra = ($profiles -join "`n") + "`n" + $profileScript
 
 # ---------- 各ページを書き出す ----------
@@ -770,6 +783,7 @@ foreach ($file in $pages) {
     continue
   }
   $part = [IO.File]::ReadAllText((Join-Path $root "_parts\$file"), $utf8)
+  if ($file -eq 'index.html') { $part = $part.Replace('<!--TOP_MEMBERS-->', $topMembersHtml) }
   if ($file -eq 'members.html') { $part = $part.Replace('<!--MEMBERS-->', $membersHtml).Replace('</main>', "</main>`n$membersExtra") }
   $m = [regex]::Match($part, '<!-- title: (.+?) -->')
   Write-Page $file $m.Groups[1].Value $part.Substring($m.Index + $m.Length).Trim() $file $descs[$file]
