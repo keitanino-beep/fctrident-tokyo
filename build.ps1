@@ -168,6 +168,7 @@ $band
 $extraHead
 <title>$pageTitle</title>
 <meta name="description" content="$(Esc $desc)">
+<meta name="google-site-verification" content="3fvlOXseDaexdJXk9XOEBY44Orwv73djX0tCYXAo0rs">
 <link rel="canonical" href="$pageUrl">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="FC TRIDENT TOKYO">
