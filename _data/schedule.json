@@ -1,0 +1,4 @@
+{
+  "_help": "公式戦は matches.json から自動で載ります。ここには練習・練習試合・イベントを足します。type は practice（練習）/ friendly（練習試合）/ event（イベント）。例: { \"date\": \"2026-11-01\", \"type\": \"practice\", \"start\": \"09:00\", \"end\": \"11:00\", \"place\": \"品川区周辺\", \"note\": \"練習参加OK\" }",
+  "events": []
+}
