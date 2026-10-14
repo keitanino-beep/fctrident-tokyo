@@ -12,6 +12,7 @@ Add-Type -AssemblyName System.Drawing
 $nav = @(
   @{ file = 'news.html';    en = 'News';    jp = 'お知らせ' },
   @{ file = 'match.html';   en = 'Match';   jp = '試合情報' },
+  @{ file = 'schedule.html'; en = 'Schedule'; jp = '活動日程' },
   @{ file = 'members.html'; en = 'Members'; jp = 'メンバー' },
   @{ file = 'gallery.html'; en = 'Gallery'; jp = 'ギャラリー' },
   @{ file = 'recruit.html'; en = 'Recruit'; jp = '選手募集' },
@@ -89,6 +90,7 @@ $descs = @{
   'index.html'   = $defaultDesc + '試合情報、メンバー、試合アルバム、スポンサー募集を掲載しています。'
   'news.html'    = 'FC TRIDENT TOKYOのお知らせ。試合結果や告知、クラブからのニュースをお届けします。'
   'match.html'   = 'FC TRIDENT TOKYOの2026シーズンの日程・結果と、FOOTBALL 7 SOCIETY LEAGUE 関東リーグ 4部Cの順位表です。'
+  'schedule.html' = 'FC TRIDENT TOKYOの活動日程。公式戦の日時・会場・対戦相手と結果を掲載しています。'
   'members.html' = 'FC TRIDENT TOKYOの選手・スタッフ紹介とユニフォームです。'
   'gallery.html' = 'FC TRIDENT TOKYOの試合ごとの写真アルバムと試合動画です。'
   'club.html'    = 'FC TRIDENT TOKYOの理念、チーム紹介、基本情報、沿革です。'
@@ -140,7 +142,7 @@ $band
       </div>
       <nav class="foot-links" aria-label="フッターメニュー">
         <a href="index.html">トップ</a><a href="news.html">お知らせ</a><a href="match.html">試合情報</a>
-        <a href="members.html">メンバー</a><a href="gallery.html">ギャラリー</a><a href="sponsor.html">スポンサー募集</a>
+        <a href="schedule.html">活動日程</a><a href="members.html">メンバー</a><a href="gallery.html">ギャラリー</a><a href="sponsor.html">スポンサー募集</a>
         <a href="recruit.html">選手募集</a><a href="club.html">クラブ概要</a><a href="contact.html">お問い合わせ</a>
         <a href="https://www.instagram.com/fctridenttokyo_society/" target="_blank" rel="noopener">Instagram</a>
         <a href="privacy.html">プライバシーポリシー</a>
@@ -447,11 +449,183 @@ $galleryBody = @"
 </main>
 "@
 
+# ---------- 活動日程 ----------
+# 公式戦は matches.json から自動で入れる。練習・練習試合・イベントは _data/schedule.json の events に足す
+$typeInfo = @{
+  official = @{ jp = '公式戦';   order = 1 }
+  friendly = @{ jp = '練習試合'; order = 2 }
+  practice = @{ jp = '練習';     order = 3 }
+  event    = @{ jp = 'イベント'; order = 4 }
+}
+$albumByDate = @{}; foreach ($a in $withPhotos) { $albumByDate[$a.m.date] = $a.page }
+$events = @()
+foreach ($m in $data.matches) {
+  $events += [pscustomobject]@{
+    date = $m.date; type = 'official'; start = $m.kickoff; end = ''; title = "関東リーグ $($data.division) 第$($m.round)節"
+    opponent = $m.opponent; logo = $m.logo; ha = $m.ha; place = $m.venue; note = ''; us = $m.us; them = $m.them
+    link = $albumByDate[$m.date]
+  }
+}
+$schedFile = Join-Path $root '_data\schedule.json'
+if (Test-Path $schedFile) {
+  foreach ($e in @(([IO.File]::ReadAllText($schedFile, $utf8) | ConvertFrom-Json).events)) {
+    if (-not $e.date) { continue }
+    $type = if ($typeInfo.ContainsKey([string]$e.type)) { [string]$e.type } else { 'event' }
+    $events += [pscustomobject]@{
+      date = $e.date; type = $type; start = $e.start; end = $e.end; title = $(if ($e.title) { $e.title } else { $typeInfo[$type].jp })
+      opponent = $e.opponent; logo = $e.logo; ha = $e.ha; place = $e.place; note = $e.note; us = $e.us; them = $e.them; link = $e.link
+    }
+  }
+}
+$todayKey = (Get-Date).ToString('yyyy-MM-dd')
+$inv = [Globalization.CultureInfo]::InvariantCulture
+
+function Event-Html($e, $isPast) {
+  $d = [DateTime]::ParseExact($e.date, 'yyyy-MM-dd', $null)
+  $wk = if ($d.DayOfWeek -eq 'Saturday') { ' sat' } elseif ($d.DayOfWeek -eq 'Sunday') { ' sun' } else { '' }
+  $isMatch = $e.type -eq 'official' -or $e.type -eq 'friendly'
+  $time = ''
+  if ($e.start) { $time = if ($isMatch) { "$($e.start) KICK OFF" } elseif ($e.end) { "$($e.start)〜$($e.end)" } else { "$($e.start)〜" } }
+  elseif (-not $isPast) { $time = '時間未定' }
+  $meta = @()
+  if ($time) { $meta += "<span class=`"ev-time`">$(Esc $time)</span>" }
+  if ($e.place) { $meta += "<span class=`"ev-place`">$(Esc $e.place)</span>" }
+  if ($e.ha) { $meta += "<span>$(if ($e.ha -eq 'H') { 'ホーム' } else { 'アウェイ' })</span>" }
+  $vs = ''
+  if ($e.opponent) {
+    $logo = if ($e.logo) { "<img src=`"$($e.logo)`" alt=`"`">" } else { '' }
+    $vs = "<p class=`"ev-vs`"><span class=`"ev-vs-us`"><img src=`"emblem.webp`" alt=`"`"></span><b>VS</b>$logo<span>$(Esc $e.opponent)</span></p>"
+  }
+  $note = if ($e.note) { "<p class=`"ev-note`">$(Esc $e.note)</p>" } else { '' }
+  # 右側：終わった試合は結果、これからの予定は「カレンダーに追加」
+  $side = ''
+  if ($isPast -and $null -ne $e.us -and $null -ne $e.them) {
+    $res = if ($e.us -gt $e.them) { 'WIN', 'w' } elseif ($e.us -lt $e.them) { 'LOSE', 'l' } else { 'DRAW', 'd' }
+    $side = "<span class=`"ev-score`">$($e.us)<span class=`"dash`">-</span>$($e.them)</span><span class=`"res $($res[1])`">$($res[0])</span>"
+    if ($e.link) { $side += "<a class=`"ev-link`" href=`"$($e.link)`">写真・動画</a>" }
+  } elseif (-not $isPast) {
+    $text = 'FC TRIDENT TOKYO ' + $e.title + $(if ($e.opponent) { " vs $($e.opponent)" } else { '' })
+    if ($e.start) {
+      $s = [DateTime]::ParseExact("$($e.date) $($e.start)", 'yyyy-MM-dd HH:mm', $null)
+      $f = if ($e.end) { [DateTime]::ParseExact("$($e.date) $($e.end)", 'yyyy-MM-dd HH:mm', $null) } else { $s.AddHours(2) }
+      $dates = $s.ToString('yyyyMMddTHHmm00') + '/' + $f.ToString('yyyyMMddTHHmm00')
+    } else {
+      $dates = $d.ToString('yyyyMMdd') + '/' + $d.AddDays(1).ToString('yyyyMMdd')
+    }
+    $gcal = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + [uri]::EscapeDataString($text) +
+      '&dates=' + $dates + '&ctz=Asia%2FTokyo&location=' + [uri]::EscapeDataString([string]$e.place) +
+      '&details=' + [uri]::EscapeDataString("FC TRIDENT TOKYO 活動日程`n${siteUrl}schedule.html")
+    $side = "<a class=`"ev-cal`" href=`"$(Esc $gcal)`" target=`"_blank`" rel=`"noopener`">＋ カレンダーに追加</a><span class=`"ev-done`">終了</span>"
+  }
+  return @"
+<li class="ev" data-type="$($e.type)" data-date="$($e.date)">
+            <div class="ev-date$wk"><b>$($d.Day)</b><span>$($d.ToString('ddd', $inv).ToUpper())<small>$($days[[int]$d.DayOfWeek])</small></span></div>
+            <div class="ev-body">
+              <p class="ev-head"><span class="ev-type $($e.type)">$($typeInfo[$e.type].jp)</span><span class="ev-title">$(Esc $e.title)</span></p>
+              $vs
+              <p class="ev-meta">$($meta -join '')</p>
+              $note
+            </div>
+            <div class="ev-side">$side</div>
+          </li>
+"@
+}
+
+function Month-Groups($list, $isPast) {
+  $out = @()
+  foreach ($g in ($list | Group-Object { $_.date.Substring(0, 7) })) {
+    $d = [DateTime]::ParseExact($g.Name + '-01', 'yyyy-MM-dd', $null)
+    $items = ($g.Group | ForEach-Object { Event-Html $_ $isPast }) -join "`n          "
+    $out += @"
+<section class="ev-month">
+        <h3 class="ev-month-head"><b>$($d.Month)</b><span>$($d.ToString('MMM', $inv).ToUpper())<small>$($d.Year)</small></span></h3>
+        <ol class="ev-list">
+          $items
+        </ol>
+      </section>
+"@
+  }
+  return ($out -join "`n      ")
+}
+
+$upcoming = @($events | Where-Object { $_.date -ge $todayKey } | Sort-Object date, start)
+$past = @($events | Where-Object { $_.date -lt $todayKey } | Sort-Object date, start -Descending)
+$usedTypes = @($events | ForEach-Object { $_.type } | Select-Object -Unique | Sort-Object { $typeInfo[$_].order })
+$filters = ''
+if ($usedTypes.Count -gt 1) {
+  $filters = '<div class="filters" role="group" aria-label="種類で絞り込む"><button type="button" data-filter="all" aria-pressed="true">すべて</button>' +
+    (($usedTypes | ForEach-Object { "<button type=`"button`" data-filter=`"$_`" aria-pressed=`"false`">$($typeInfo[$_].jp)</button>" }) -join '') + '</div>'
+}
+$upcomingHtml = if ($upcoming.Count) { Month-Groups $upcoming $false } else { '<p class="ev-empty">いま決まっている予定はありません。</p>' }
+$pastHtml = if ($past.Count) { @"
+<details class="ev-past">
+        <summary>終了した日程<span>$($past.Count)</span></summary>
+        $(Month-Groups $past $true)
+      </details>
+"@ } else { '' }
+
+$scheduleBody = @"
+<main>
+  <section class="page-head">
+    <div class="wrap">
+      <p class="crumb"><a href="index.html">Top</a> / Schedule</p>
+      <p class="eyebrow">Schedule</p>
+      <h1>活動日程</h1>
+      <p class="lead">公式戦の日程と結果をまとめています。練習や練習試合の日程も、順次ここに掲載していきます。</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap">
+      <div class="sec-head"><div><p class="eyebrow">Upcoming</p><h2>これからの予定</h2></div><a class="more" href="match.html">Standings <span class="jp">順位表を見る</span></a></div>
+      $filters
+      <div class="ev-months" id="ev-upcoming">
+      $upcomingHtml
+      </div>
+      $pastHtml
+      <p class="src">日時・会場は変更になることがあります。最新の情報は<a href="https://www.instagram.com/fctridenttokyo_society/" target="_blank" rel="noopener">Instagram</a>でもお知らせします。練習に参加したい方は<a href="recruit.html">選手募集</a>をご覧ください。</p>
+    </div>
+  </section>
+</main>
+<script>
+  (function () {
+    // ページを作り直す前に日付が過ぎた予定は「終了」にし、次の予定に NEXT を付ける
+    var now = new Date();
+    var today = now.getFullYear() + '-' + ('0' + (now.getMonth() + 1)).slice(-2) + '-' + ('0' + now.getDate()).slice(-2);
+    var next = null;
+    Array.prototype.forEach.call(document.querySelectorAll('#ev-upcoming .ev'), function (li) {
+      if (li.getAttribute('data-date') < today) { li.classList.add('is-done'); }
+      else if (!next) { next = li; }
+    });
+    function markNext() {
+      Array.prototype.forEach.call(document.querySelectorAll('.ev.is-next'), function (li) { li.classList.remove('is-next'); });
+      var first = Array.prototype.find.call(document.querySelectorAll('#ev-upcoming .ev'), function (li) { return !li.classList.contains('is-done') && !li.hidden; });
+      if (first) first.classList.add('is-next');
+    }
+    markNext();
+    var buttons = document.querySelectorAll('.filters button');
+    Array.prototype.forEach.call(buttons, function (b) {
+      b.addEventListener('click', function () {
+        var f = b.getAttribute('data-filter');
+        Array.prototype.forEach.call(buttons, function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+        Array.prototype.forEach.call(document.querySelectorAll('.ev'), function (li) { li.hidden = f !== 'all' && li.getAttribute('data-type') !== f; });
+        Array.prototype.forEach.call(document.querySelectorAll('.ev-month'), function (sec) { sec.hidden = !sec.querySelector('.ev:not([hidden])'); });
+        markNext();
+      });
+    });
+  })();
+</script>
+"@
+
 # ---------- 各ページを書き出す ----------
 $pages = @('index.html') + ($nav | ForEach-Object { $_.file }) + @('privacy.html', '404.html')
 foreach ($file in $pages) {
   if ($file -eq 'gallery.html') {
     Write-Page $file 'ギャラリー' $galleryBody $file $descs[$file]
+    continue
+  }
+  if ($file -eq 'schedule.html') {
+    Write-Page $file '活動日程' $scheduleBody $file $descs[$file]
     continue
   }
   $part = [IO.File]::ReadAllText((Join-Path $root "_parts\$file"), $utf8)
