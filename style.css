@@ -763,13 +763,64 @@ fieldset.field { border: 0; padding: 0; margin: 0; }
   .match { padding: 22px 18px 18px; }
   .partner, .join .wrap { padding-block: 72px; }
 }
+/* クラブ概要：目標の階段、チーム像、大切にしていること、役割 */
+.roadmap { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: end; }
+.roadmap li {
+  position: relative; background: var(--ink-2); padding: 26px 26px 24px; display: grid; gap: 6px; align-content: start;
+  border-top: 4px solid var(--red); clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 0 100%);
+}
+.roadmap .step-1 { min-height: 250px; }
+.roadmap .step-2 { min-height: 310px; border-top-color: var(--yellow); }
+.roadmap .step-3 { min-height: 370px; border-top-color: var(--yellow); background: linear-gradient(160deg, rgba(215, 38, 47, .45), var(--ink-2) 70%); }
+.rm-label { font-family: var(--font-label); font-weight: 800; font-size: 13px; letter-spacing: .22em; color: var(--muted); }
+.rm-year { font-family: var(--font-en); font-weight: 400; font-size: 72px; line-height: .95; color: transparent; -webkit-text-stroke: 1.4px rgba(246, 242, 238, .8); }
+.step-3 .rm-year { color: var(--yellow); -webkit-text-stroke: 0; }
+.rm-goal { font-weight: 900; font-size: clamp(20px, 2.4vw, 28px); line-height: 1.35; letter-spacing: .04em; margin-top: 6px; }
+.rm-note { font-size: 13px; color: var(--muted); font-weight: 700; }
+.offpitch { margin-top: 28px; display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 24px; align-items: center; border: 1px solid var(--line); padding: 22px 26px; }
+.offpitch-label { font-weight: 900; font-size: 16px; letter-spacing: .06em; display: flex; align-items: center; gap: 12px; }
+.offpitch-label::before { content: ""; width: 26px; height: 4px; background: var(--yellow); transform: skewX(-30deg); }
+.offpitch ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.offpitch li { display: grid; gap: 2px; }
+.offpitch b { font-size: 15px; }
+.offpitch span { font-size: 12px; color: var(--muted); }
+.styles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.styles div { background: var(--ink-2); padding: 24px 22px; display: grid; gap: 8px; align-content: start; border-left: 4px solid var(--red); }
+.st-num { font-family: var(--font-en); font-size: 40px; line-height: 1; color: transparent; -webkit-text-stroke: 1.2px var(--yellow); }
+.styles b { font-size: 18px; font-weight: 900; letter-spacing: .02em; }
+.styles p { font-size: 13px; color: var(--muted); }
+.rules { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; counter-reset: rule; }
+.rules li { counter-increment: rule; display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: 14px; background: var(--ink-2); padding: 16px 18px; }
+.rules li::before { content: counter(rule); grid-row: span 2; font-family: var(--font-en); font-size: 34px; line-height: 1; color: var(--red); }
+.rules b { font-size: 16px; font-weight: 900; }
+.rules span { font-size: 13px; color: var(--muted); }
+.rules-sum { margin-top: 18px; font-weight: 900; font-size: 17px; color: var(--yellow); }
+.rules-sum::before { content: "★ "; }
+.roles { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.roles div { background: var(--ink-2); padding: 16px 18px; border-top: 3px solid var(--red); display: grid; gap: 2px; }
+.roles div:first-child { grid-column: 1 / -1; border-top-color: var(--yellow); }
+.roles dt { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .04em; }
+.roles dt small { font-size: 11px; }
+.roles dd { margin: 0; font-size: 18px; font-weight: 900; letter-spacing: .04em; }
+@media (max-width: 1000px) {
+  .styles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .offpitch { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .roadmap { grid-template-columns: minmax(0, 1fr); }
+  .roadmap li { min-height: 0 !important; }
+  .rm-year { font-size: 56px; }
+  .styles, .offpitch ul { grid-template-columns: minmax(0, 1fr); }
+  .roles { grid-template-columns: minmax(0, 1fr); }
+}
+
 /* 選手の写真とプロフィール */
 .member-photo > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
 .member-photo::before { z-index: 1; }
 /* 白背景の写真：暗いグラデーションを外し、背番号をチームカラーの縁取りにする */
 .member-photo.fp:has(> img), .member-photo.gk:has(> img) { background: #fff; }
 .member-photo.fp:has(> img)::before, .member-photo.gk:has(> img)::before { background: linear-gradient(180deg, transparent 82%, rgba(13, 11, 12, .14)); }
-.member-photo:has(> img) .num { -webkit-text-stroke: 2px var(--red); }
+.member-photo:has(> img) .num { -webkit-text-stroke: 1.6px var(--red); font-size: 50px; right: 10px; top: 8px; }
 .member-photo.gk:has(> img) .num { -webkit-text-stroke-color: var(--green); }
 .member-photo .num { z-index: 2; }
 .member-soon {
