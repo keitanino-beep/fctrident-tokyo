@@ -103,6 +103,16 @@ $descs = @{
   'privacy.html' = 'FC TRIDENT TOKYOのプライバシーポリシーです。'
   '404.html'     = 'お探しのページが見つかりませんでした。'
 }
+# Google アナリティクス（GA4 の測定 ID。空なら読み込まない）
+$gaId = 'G-H27ZJS6CV7'
+$gaTag = ''
+if ($gaId) {
+  $gaTag = @"
+<script async src="https://www.googletagmanager.com/gtag/js?id=$gaId"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','$gaId');</script>
+"@
+}
+
 $jsonLd = @"
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"SportsTeam","name":"FC TRIDENT TOKYO","alternateName":"FCトライデント東京","sport":"Football 7 (ソサイチ)","url":"$siteUrl","logo":"${siteUrl}icon-512.png","foundingDate":"2025","location":{"@type":"Place","name":"東京都"},"memberOf":{"@type":"SportsOrganization","name":"FOOTBALL 7 SOCIETY LEAGUE 関東リーグ"},"sameAs":["https://www.instagram.com/fctridenttokyo_society/","https://football7society.jp/kanto/team/fc-trident-tokyo/"]}
@@ -170,6 +180,7 @@ $band
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+$gaTag
 $extraHead
 <title>$pageTitle</title>
 <meta name="description" content="$(Esc $desc)">
