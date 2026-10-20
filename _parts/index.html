@@ -1,5 +1,19 @@
 <!-- title: トップ -->
 <main>
+  <section class="slider" id="slider" aria-roledescription="carousel" aria-label="試合アルバム">
+    <div class="slider-viewport">
+      <div class="slider-track">
+        <!--TOP_SLIDES-->
+      </div>
+    </div>
+    <div class="wrap slider-ctrl">
+      <button type="button" class="slider-btn slider-prev" aria-label="前のスライド">‹</button>
+      <div class="slider-dots"></div>
+      <button type="button" class="slider-btn slider-pause" aria-label="自動再生を止める"></button>
+      <button type="button" class="slider-btn slider-next" aria-label="次のスライド">›</button>
+    </div>
+  </section>
+
   <section class="hero">
     <span class="hero-word" aria-hidden="true">TRIDENT</span>
     <div class="wrap hero-grid">
@@ -135,6 +149,128 @@
   </section>
 </main>
 <script>
+  /* センターモードのカルーセル。両端に複製を置いて、端まで行ったら本物の位置へ瞬間移動して無限ループにする */
+  (function () {
+    var root = document.getElementById('slider');
+    var track = root.querySelector('.slider-track');
+    var viewport = root.querySelector('.slider-viewport');
+    var real = Array.prototype.slice.call(track.querySelectorAll('.slide'));
+    var n = real.length;
+    if (n === 0) { root.hidden = true; return; }
+    if (n === 1) { root.querySelector('.slider-ctrl').hidden = true; real[0].classList.add('is-active'); track.classList.add('is-single'); return; }
+
+    function cloneAll() {
+      return real.map(function (s) {
+        var c = s.cloneNode(true);
+        c.setAttribute('aria-hidden', 'true'); c.tabIndex = -1; c.classList.add('is-clone');
+        return c;
+      });
+    }
+    cloneAll().forEach(function (c) { track.insertBefore(c, real[0]); });
+    cloneAll().forEach(function (c) { track.appendChild(c); });
+    var slides = Array.prototype.slice.call(track.children);
+
+    var dotsBox = root.querySelector('.slider-dots');
+    var dots = real.map(function (s, k) {
+      s.setAttribute('aria-roledescription', 'slide');
+      s.setAttribute('aria-label', (k + 1) + ' / ' + n);
+      var d = document.createElement('button');
+      d.type = 'button'; d.className = 'slider-dot'; d.setAttribute('aria-label', 'スライド ' + (k + 1));
+      d.addEventListener('click', function () { go(n + k); restart(); });
+      dotsBox.appendChild(d);
+      return d;
+    });
+
+    var cur = n, dragX = 0;
+    function offset(i) {
+      var s = slides[i];
+      return viewport.clientWidth / 2 - (s.offsetLeft + s.offsetWidth / 2);
+    }
+    function place(animate) {
+      track.classList.toggle('no-anim', !animate);
+      track.style.transform = 'translateX(' + (offset(cur) + dragX) + 'px)';
+      slides.forEach(function (s, i) {
+        var on = i === cur;
+        s.classList.toggle('is-active', on);
+        if (!s.classList.contains('is-clone')) s.tabIndex = on ? 0 : -1;
+      });
+      dots.forEach(function (d, k) { d.setAttribute('aria-current', k === (cur - n) % n ? 'true' : 'false'); });
+      if (!animate) { void track.offsetWidth; track.classList.remove('no-anim'); }
+    }
+    // 複製の上にいたら、同じ見た目の本物へアニメなしで移る
+    function normalize() {
+      if (cur < n || cur >= 2 * n) { cur = n + ((cur - n) % n + n) % n; place(false); }
+    }
+    var settle = null;
+    function go(i) {
+      normalize();
+      cur = i;
+      place(true);
+      // transitionend が来ないとき（動きを減らす設定・裏のタブなど）の保険
+      clearTimeout(settle);
+      settle = setTimeout(normalize, parseFloat(getComputedStyle(track).transitionDuration) * 1000 + 50);
+    }
+    track.addEventListener('transitionend', function (e) { if (e.target === track && e.propertyName === 'transform') normalize(); });
+
+    root.querySelector('.slider-prev').addEventListener('click', function () { go(cur - 1); restart(); });
+    root.querySelector('.slider-next').addEventListener('click', function () { go(cur + 1); restart(); });
+    root.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowLeft') { go(cur - 1); restart(); }
+      if (e.key === 'ArrowRight') { go(cur + 1); restart(); }
+    });
+    // 横のスライドを押したら、ページを開かずにそのスライドへ移る
+    track.addEventListener('click', function (e) {
+      var s = e.target.closest('.slide');
+      if (moved) { e.preventDefault(); return; }
+      if (s && !s.classList.contains('is-active')) { e.preventDefault(); go(slides.indexOf(s)); restart(); }
+    });
+
+    // ドラッグ・スワイプ
+    var x0 = null, moved = false;
+    viewport.addEventListener('pointerdown', function (e) {
+      if (e.button !== 0) return;
+      normalize();
+      x0 = e.clientX; moved = false; dragX = 0;
+    });
+    viewport.addEventListener('pointermove', function (e) {
+      if (x0 === null) return;
+      dragX = e.clientX - x0;
+      if (Math.abs(dragX) > 8) { moved = true; viewport.setPointerCapture(e.pointerId); }
+      if (moved) { track.classList.add('no-anim'); track.style.transform = 'translateX(' + (offset(cur) + dragX) + 'px)'; }
+    });
+    function end() {
+      if (x0 === null) return;
+      var dx = dragX; x0 = null; dragX = 0;
+      var w = slides[cur].offsetWidth;
+      if (Math.abs(dx) > Math.min(60, w / 5)) go(cur + (dx < 0 ? 1 : -1)); else place(true);
+      restart();
+      setTimeout(function () { moved = false; }, 0);
+    }
+    viewport.addEventListener('pointerup', end);
+    viewport.addEventListener('pointercancel', end);
+
+    // 自動再生（動きを減らす設定のときは止めておく）
+    var pauseBtn = root.querySelector('.slider-pause');
+    var playing = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var hold = false, timer = null;
+    function restart() {
+      clearInterval(timer);
+      if (playing && !hold && !document.hidden) timer = setInterval(function () { go(cur + 1); }, 5000);
+      pauseBtn.classList.toggle('is-paused', !playing);
+      pauseBtn.setAttribute('aria-label', playing ? '自動再生を止める' : '自動再生する');
+    }
+    pauseBtn.addEventListener('click', function () { playing = !playing; restart(); });
+    root.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') { hold = true; restart(); } });
+    root.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse') { hold = false; restart(); } });
+    root.addEventListener('focusin', function () { hold = true; restart(); });
+    root.addEventListener('focusout', function (e) { if (!root.contains(e.relatedTarget)) { hold = false; restart(); } });
+    document.addEventListener('visibilitychange', restart);
+    window.addEventListener('resize', function () { place(false); });
+
+    place(false);
+    restart();
+  })();
+
   /* instagram.json は GitHub Actions が6時間ごとに作り直す。読めないときは仮の枠のまま */
   (function () {
     var grid = document.getElementById('ig-grid');
