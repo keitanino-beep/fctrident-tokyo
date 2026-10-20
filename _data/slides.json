@@ -1,0 +1,45 @@
+{
+  "_help": "トップのカルーセル。上から順に表示。image は写真のパス、kicker は黄色い小さい文字、title は見出し、text は補足、link は押したときのページ、cta はボタンの文字",
+  "slides": [
+    {
+      "image": "gallery/2026-10-10/20261010_kanto_div4c_sec5_0276.jpg",
+      "kicker": "NEXT MATCH ・ 第9節",
+      "title": "10/24（土）首位決戦 vs South Tokyo FC",
+      "text": "15:40 KICK OFF ・ スリースターフィールド鶴ヶ島",
+      "link": "match.html",
+      "cta": "試合情報を見る"
+    },
+    {
+      "image": "gallery/2026-10-10/20261010_kanto_div4c_sec5_0319.jpg",
+      "kicker": "LAST RESULT ・ 第5節",
+      "title": "9-2で勝利、開幕8連勝",
+      "text": "vs 宮前スカーヴァティー ・ 2026.10.10",
+      "link": "gallery-2026-10-10.html",
+      "cta": "アルバムを見る"
+    },
+    {
+      "image": "gallery/2026-09-26/20260926_kanto_div4c_sec8_0260.jpg",
+      "kicker": "PLAYERS WANTED",
+      "title": "本気で上を目指す仲間を募集中",
+      "text": "選手・マネージャーを全ポジションで募集しています",
+      "link": "recruit.html",
+      "cta": "選手募集を見る"
+    },
+    {
+      "image": "gallery/2026-10-10/20261010_kanto_div4c_sec5_0278.jpg",
+      "kicker": "PARTNER WANTED",
+      "title": "チームを一緒に強くしてくれる企業を募集",
+      "text": "ユニフォーム・HP・Instagramでご紹介します",
+      "link": "sponsor.html",
+      "cta": "スポンサーについて"
+    },
+    {
+      "image": "gallery/2026-10-10/20261010_kanto_div4c_sec5_0277.jpg",
+      "kicker": "GALLERY",
+      "title": "試合と活動の様子",
+      "text": "試合ごとの写真アルバムと試合動画をまとめています",
+      "link": "gallery.html",
+      "cta": "ギャラリーを見る"
+    }
+  ]
+}
