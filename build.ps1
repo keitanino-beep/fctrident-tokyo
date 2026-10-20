@@ -781,13 +781,15 @@ $topMembers = foreach ($pos in $posNames.Keys) {
 }
 $topMembersHtml = ($topMembers -join "`n        ")
 
-# トップのカルーセル：写真のある試合の表紙を新しい順に（最大8枚）
+# トップのカルーセル：中身は _data/slides.json に書く（上から順に表示）
+$slideData = [IO.File]::ReadAllText((Join-Path $root '_data\slides.json'), $utf8) | ConvertFrom-Json
 $slideNo = 0
-$topSlides = foreach ($a in @($withPhotos | Where-Object { $_.photos.Count -gt 0 } | Select-Object -First 8)) {
-  $m = $a.m
+$topSlides = foreach ($s in $slideData.slides) {
   # ページの最上部なので、最初の1枚だけはすぐ読み込む
   $load = if ($slideNo++ -eq 0) { 'eager' } else { 'lazy' }
-  "<a class=`"slide`" href=`"$($a.page)`"><img src=`"$($a.photos[0])`" alt=`"第$($m.round)節 vs $(Esc $m.opponent) の写真`" loading=`"$load`" draggable=`"false`"><span class=`"slide-cap`"><small>ROUND $($m.round) ・ $($a.dateLabel)</small><b>vs $(Esc $m.opponent)</b><span class=`"slide-score`"><span class=`"res $($a.resCls)`">$($a.result)</span>$($m.us) - $($m.them)</span></span></a>"
+  $text = if ($s.text) { "<span class=`"slide-text`">$(Esc $s.text)</span>" } else { '' }
+  $cta = if ($s.cta) { "<span class=`"slide-more`">$(Esc $s.cta) <span class=`"arrow`">→</span></span>" } else { '' }
+  "<a class=`"slide`" href=`"$(Esc $s.link)`"><img src=`"$(Esc $s.image)`" alt=`"`" loading=`"$load`" draggable=`"false`"><span class=`"slide-cap`"><small>$(Esc $s.kicker)</small><b>$(Esc $s.title)</b>$text$cta</span></a>"
 }
 $topSlidesHtml = ($topSlides -join "`n        ")
 $membersExtra = ($profiles -join "`n") + "`n" + $profileScript
