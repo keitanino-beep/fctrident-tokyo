@@ -1,4 +1,4 @@
-# _parts/*.html に共通のヘッダー・帯・フッターを付けて、各ページの HTML を作る
+﻿# _parts/*.html に共通のヘッダー・帯・フッターを付けて、各ページの HTML を作る
 # ギャラリーは _data/matches.json と photos/<日付>_<対戦相手>/ から自動で作る
 #   - 写真は縮小して gallery/<日付>/ と gallery/<日付>/thumb/ に書き出す
 #   - 写真がある試合だけアルバムページ（gallery-<日付>.html）を作る
@@ -780,6 +780,16 @@ $topMembers = foreach ($pos in $posNames.Keys) {
   "<a class=`"member`" href=`"members.html`"><div class=`"member-photo $kind`">$img<span class=`"num`">$($p.num)</span></div><div class=`"member-info`"><span class=`"$posCls`">$pos</span><b>$(Esc $p.name)</b><span class=`"note`">$note</span></div></a>"
 }
 $topMembersHtml = ($topMembers -join "`n        ")
+
+# トップのカルーセル：写真のある試合の表紙を新しい順に（最大8枚）
+$slideNo = 0
+$topSlides = foreach ($a in @($withPhotos | Where-Object { $_.photos.Count -gt 0 } | Select-Object -First 8)) {
+  $m = $a.m
+  # ページの最上部なので、最初の1枚だけはすぐ読み込む
+  $load = if ($slideNo++ -eq 0) { 'eager' } else { 'lazy' }
+  "<a class=`"slide`" href=`"$($a.page)`"><img src=`"$($a.photos[0])`" alt=`"第$($m.round)節 vs $(Esc $m.opponent) の写真`" loading=`"$load`" draggable=`"false`"><span class=`"slide-cap`"><small>ROUND $($m.round) ・ $($a.dateLabel)</small><b>vs $(Esc $m.opponent)</b><span class=`"slide-score`"><span class=`"res $($a.resCls)`">$($a.result)</span>$($m.us) - $($m.them)</span></span></a>"
+}
+$topSlidesHtml = ($topSlides -join "`n        ")
 $membersExtra = ($profiles -join "`n") + "`n" + $profileScript
 
 # ---------- 各ページを書き出す ----------
@@ -794,7 +804,7 @@ foreach ($file in $pages) {
     continue
   }
   $part = [IO.File]::ReadAllText((Join-Path $root "_parts\$file"), $utf8)
-  if ($file -eq 'index.html') { $part = $part.Replace('<!--TOP_MEMBERS-->', $topMembersHtml) }
+  if ($file -eq 'index.html') { $part = $part.Replace('<!--TOP_MEMBERS-->', $topMembersHtml).Replace('<!--TOP_SLIDES-->', $topSlidesHtml) }
   if ($file -eq 'members.html') { $part = $part.Replace('<!--MEMBERS-->', $membersHtml).Replace('</main>', "</main>`n$membersExtra") }
   $m = [regex]::Match($part, '<!-- title: (.+?) -->')
   Write-Page $file $m.Groups[1].Value $part.Substring($m.Index + $m.Length).Trim() $file $descs[$file]
