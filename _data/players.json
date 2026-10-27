@@ -4,7 +4,7 @@
   "_divisionHelp": "所属部門。選手ごとに \"division\" を書けばその選手だけ変えられる（例: \"フットサル部門\"）",
   "defaultDivision": "ソサイチ部門",
   "players": [
-    { "num": 1, "name": "谷野 渓", "pos": "GK", "goals": 0, "profile": {
+    { "num": 1, "name": "谷野 渓", "pos": "GK", "goals": 0, "play": { "src": "gallery/2026-04-25/20260425_kanto_div4c_sec3_0296.jpg", "cx": 820, "top": 50, "h": 1150 }, "profile": {
       "nickname": "みんなのアイドル谷ちゃん、タニーニョ",
       "career": "日本学園高等学校 → アローレ八王子",
       "skill": "円堂守越えの声量と室伏並みのロングスロー、イゴールを勝るほどの気合と根性",
@@ -41,9 +41,9 @@
       "message": "こんなとこでつまづいていられないので俺がチームを優勝させます。",
       "motto": "気合と根性",
       "favorite": "ロナウジーニョ" } },
-    { "num": 16, "name": "今野 友瑛", "pos": "DF", "goals": 5 },
+    { "num": 16, "name": "今野 友瑛", "pos": "DF", "goals": 5, "play": { "src": "gallery/2026-04-25/20260425_kanto_div4c_sec3_0266.jpg", "cx": 850, "top": 100, "h": 1100 } },
     { "num": 3, "name": "中村 利記", "pos": "MF", "goals": 0 },
-    { "num": 11, "name": "秋葉 正裕", "pos": "MF", "goals": 7 },
+    { "num": 11, "name": "秋葉 正裕", "pos": "MF", "goals": 7, "play": { "src": "gallery/2026-04-25/20260425_kanto_div4c_sec3_0306.jpg", "cx": 1060, "top": 100, "h": 1100 } },
     { "num": 14, "name": "髙橋 飛翔", "pos": "MF", "goals": 12, "play": { "src": "gallery/2026-09-26/20260926_kanto_div4c_sec8_0254.jpg", "cx": 940, "top": 150, "h": 1050 }, "note": "チーム得点王", "profile": {
       "nickname": "つん、つー",
       "career": "矢板中央 ← SC相模原U21、SC相模原",
@@ -63,7 +63,7 @@
       "message": "常勝軍団を目指します",
       "motto": "不撓不屈",
       "favorite": "ネイマール" } },
-    { "num": 80, "name": "鈴木 嵐道", "pos": "MF", "goals": 7, "profile": {
+    { "num": 80, "name": "鈴木 嵐道", "pos": "MF", "goals": 7, "play": { "src": "gallery/2026-09-26/20260926_kanto_div4c_sec8_0237.jpg", "cx": 720, "top": 150, "h": 1000 }, "profile": {
       "nickname": "らんどー",
       "career": "第一学院高等学校",
       "skill": "ドリブル、両利き、カットインまで",
@@ -82,7 +82,7 @@
       "motto": "ニャブリ、ニャブリ、ニャブリ〜！",
       "favorite": "セルジュ・ニャブリ" } },
     { "num": 8, "name": "小林 楓雅", "pos": "FW", "goals": 0 },
-    { "num": 17, "name": "林 和享", "pos": "FW", "goals": 6 },
+    { "num": 17, "name": "林 和享", "pos": "FW", "goals": 6, "play": { "src": "gallery/2026-04-25/20260425_kanto_div4c_sec3_0299.jpg", "cx": 1000, "top": 40, "h": 1160 } },
     { "num": 18, "name": "菊地 諒", "pos": "FW", "goals": 5, "play": { "src": "gallery/2026-07-25/20260725_kanto_div4c_sec6_0224.jpg", "cx": 1100, "top": 150, "h": 1050 }, "profile": {
       "nickname": "リョウ",
       "career": "高崎高校 → 東京外国語大学（1シーズン）",
