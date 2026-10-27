@@ -13,7 +13,7 @@
       "message": "最初のシーズンでつまずいてられないのでいつも全力で戦うよーーー！自分に戦わせてください！",
       "motto": "病は気から",
       "favorite": "ラジャ・ナインゴラン" } },
-    { "num": 21, "name": "松野 智也", "pos": "GK", "goals": 0, "profile": {
+    { "num": 21, "name": "松野 智也", "pos": "GK", "goals": 0, "play": { "src": "gallery/2026-04-25/20260425_kanto_div4c_sec3_0268.jpg", "cx": 915, "top": 100, "h": 1100 }, "profile": {
       "nickname": "まっつー、まっちゃん、ともやん",
       "career": "杉並アヤックスU18 → T.Studio RFC（2025年のみ）",
       "skill": "フィード、1対1",
@@ -22,7 +22,7 @@
       "message": "戦うよ！！",
       "motto": "なんとかなる",
       "favorite": "ティム・ハワード" } },
-    { "num": 5, "name": "草野 耀太", "pos": "DF", "goals": 1, "profile": {
+    { "num": 5, "name": "草野 耀太", "pos": "DF", "goals": 1, "play": { "src": "gallery/2026-05-23/20260523_kanto_div4c_sec4_0315.jpg", "cx": 880, "top": 20, "h": 1150 }, "profile": {
       "nickname": "がんこちゃん",
       "career": "青稜高等学校、明治のサークル",
       "skill": "意図をしないスーパーゴール",
@@ -31,8 +31,8 @@
       "message": "なんだっていい、その時全力でやるだけ。",
       "motto": "3歩進んで2は下がる",
       "favorite": "ジュード・ベリンガム" } },
-    { "num": 9, "name": "酒井 咲吾", "pos": "DF", "goals": 0 },
-    { "num": 10, "name": "新妻 蒼太", "pos": "DF", "goals": 3, "profile": {
+    { "num": 9, "name": "酒井 咲吾", "pos": "DF", "goals": 0, "play": { "src": "gallery/2026-03-28/20260328_kanto_div4c_sec2_0290.jpg", "cx": 600, "top": 0, "h": 1050 } },
+    { "num": 10, "name": "新妻 蒼太", "pos": "DF", "goals": 3, "play": { "src": "gallery/2026-10-10/20261010_kanto_div4c_sec5_0284.jpg", "cx": 825, "top": 100, "h": 1100 }, "profile": {
       "nickname": "魂の漢新妻",
       "career": "東京国際大学体育会サッカー部",
       "skill": "チームを活気づけるゴール、魂のゴール",
@@ -44,7 +44,7 @@
     { "num": 16, "name": "今野 友瑛", "pos": "DF", "goals": 5 },
     { "num": 3, "name": "中村 利記", "pos": "MF", "goals": 0 },
     { "num": 11, "name": "秋葉 正裕", "pos": "MF", "goals": 7 },
-    { "num": 14, "name": "髙橋 飛翔", "pos": "MF", "goals": 12, "note": "チーム得点王", "profile": {
+    { "num": 14, "name": "髙橋 飛翔", "pos": "MF", "goals": 12, "play": { "src": "gallery/2026-09-26/20260926_kanto_div4c_sec8_0254.jpg", "cx": 940, "top": 150, "h": 1050 }, "note": "チーム得点王", "profile": {
       "nickname": "つん、つー",
       "career": "矢板中央 ← SC相模原U21、SC相模原",
       "skill": "投げ出しカットインのシュート、ドリブルの推進力、判断能力",
@@ -53,8 +53,8 @@
       "message": "毎試合何点とっても満足しないで闘います",
       "motto": "努力に勝る天才無し",
       "favorite": "リオネル・メッシ" } },
-    { "num": 15, "name": "佐藤 真杜", "pos": "MF", "goals": 7 },
-    { "num": 77, "name": "神山 光輝", "pos": "MF", "goals": 2, "profile": {
+    { "num": 15, "name": "佐藤 真杜", "pos": "MF", "goals": 7 , "play": { "src": "gallery/2026-09-26/20260926_kanto_div4c_sec8_0262.jpg", "cx": 920, "top": 100, "h": 1100 } },
+    { "num": 77, "name": "神山 光輝", "pos": "MF", "goals": 2, "play": { "src": "gallery/2026-07-25/20260725_kanto_div4c_sec6_0190.jpg", "cx": 830, "top": 150, "h": 1000 }, "profile": {
       "nickname": "かみちゃん",
       "career": "FCオードイス",
       "skill": "ドリブル",
@@ -72,7 +72,7 @@
       "message": "楽しむ",
       "motto": "恋愛は盲目",
       "favorite": "ネイマール、ロナウジーニョ、ドウグラス・コスタ" } },
-    { "num": 7, "name": "絹野 陸斗", "pos": "FW", "goals": 0, "profile": {
+    { "num": 7, "name": "絹野 陸斗", "pos": "FW", "goals": 0, "play": { "src": "gallery/2026-09-26/20260926_kanto_div4c_sec8_0249.jpg", "cx": 830, "top": 80, "h": 1120 }, "profile": {
       "nickname": "きぬ",
       "career": "入間市立野田中学校 → 所沢中央高等学校",
       "skill": "気づいたらゴールライン越えてるサイド突破、人類を超越した人を笑わせることしかできないワードセンス",
@@ -83,7 +83,7 @@
       "favorite": "セルジュ・ニャブリ" } },
     { "num": 8, "name": "小林 楓雅", "pos": "FW", "goals": 0 },
     { "num": 17, "name": "林 和享", "pos": "FW", "goals": 6 },
-    { "num": 18, "name": "菊地 諒", "pos": "FW", "goals": 5, "profile": {
+    { "num": 18, "name": "菊地 諒", "pos": "FW", "goals": 5, "play": { "src": "gallery/2026-07-25/20260725_kanto_div4c_sec6_0224.jpg", "cx": 1100, "top": 150, "h": 1050 }, "profile": {
       "nickname": "リョウ",
       "career": "高崎高校 → 東京外国語大学（1シーズン）",
       "skill": "ポストプレー、ワンタッチシュート、競り合い、スローイング",
