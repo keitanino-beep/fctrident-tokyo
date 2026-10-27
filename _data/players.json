@@ -1,6 +1,6 @@
 {
   "_help": "メンバーページの元データ。profile は選手登録フォーム（Googleスプレッドシート）の回答から作成。年齢・画像リンクは載せない。写真は photos/players/<背番号>_<名前>/ に入れた画像の1枚目（ファイル名順。main.jpg があればそれ）を使う",
-  "goalsAsOf": "2026年10月12日",
+  "goalsAsOf": "2026年10月27日",
   "_divisionHelp": "所属部門。選手ごとに \"division\" を書けばその選手だけ変えられる（例: \"フットサル部門\"）",
   "defaultDivision": "ソサイチ部門",
   "players": [
@@ -44,7 +44,7 @@
     { "num": 16, "name": "今野 友瑛", "pos": "DF", "goals": 5 },
     { "num": 3, "name": "中村 利記", "pos": "MF", "goals": 0 },
     { "num": 11, "name": "秋葉 正裕", "pos": "MF", "goals": 7 },
-    { "num": 14, "name": "髙橋 飛翔", "pos": "MF", "goals": 11, "note": "チーム得点王", "profile": {
+    { "num": 14, "name": "髙橋 飛翔", "pos": "MF", "goals": 12, "note": "チーム得点王", "profile": {
       "nickname": "つん、つー",
       "career": "矢板中央 ← SC相模原U21、SC相模原",
       "skill": "投げ出しカットインのシュート、ドリブルの推進力、判断能力",
