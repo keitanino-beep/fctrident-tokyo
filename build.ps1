@@ -675,6 +675,24 @@ foreach ($pos in $posNames.Keys) {
         $photo = "<img src=`"players/$($p.num).jpg`" alt=`"$(Esc $p.name)`" loading=`"lazy`">"
       }
     }
+    # 本人の写真がなければ、ギャラリーのプレー写真を切り出して使う（players.json の play：src と切り出し位置 cx・top・h）
+    if (-not $photo -and $p.play -and (Test-Path (Join-Path $root $p.play.src))) {
+      New-Item -ItemType Directory -Force $playerOut | Out-Null
+      $im = [System.Drawing.Image]::FromFile((Join-Path $root $p.play.src))
+      try {
+        $ch = [int][Math]::Min([int]$p.play.h, $im.Height); $cw = [int]($ch * 3 / 4)
+        $cx = [int][Math]::Max(0, [Math]::Min($im.Width - $cw, [int]$p.play.cx - $cw / 2))
+        $cy = [int][Math]::Max(0, [Math]::Min($im.Height - $ch, [int]$p.play.top))
+        $bmp = New-Object System.Drawing.Bitmap 750, 1000
+        $gr = [System.Drawing.Graphics]::FromImage($bmp); $gr.InterpolationMode = 'HighQualityBicubic'
+        $gr.DrawImage($im, (New-Object System.Drawing.Rectangle 0, 0, 750, 1000), (New-Object System.Drawing.Rectangle $cx, $cy, $cw, $ch), [System.Drawing.GraphicsUnit]::Pixel)
+        $ep = New-Object System.Drawing.Imaging.EncoderParameters(1)
+        $ep.Param[0] = New-Object System.Drawing.Imaging.EncoderParameter([System.Drawing.Imaging.Encoder]::Quality, [long]84)
+        $bmp.Save((Join-Path $playerOut "$($p.num).jpg"), $jpegCodec, $ep); $gr.Dispose(); $bmp.Dispose()
+      } finally { $im.Dispose() }
+      $keepPlayers["$($p.num).jpg"] = $true
+      $photo = "<img class=`"is-play`" src=`"players/$($p.num).jpg`" alt=`"$(Esc $p.name)`" loading=`"lazy`">"
+    }
     $note = "$($p.goals)ゴール" + $(if ($p.note) { '・' + $p.note } else { '' })
     $division = if ($p.division) { $p.division } else { $pdata.defaultDivision }
     $divTag = if ($division) { "<span class=`"member-div`">$(Esc $division)</span>" } else { '' }
