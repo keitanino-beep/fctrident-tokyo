@@ -675,8 +675,10 @@ foreach ($pos in $posNames.Keys) {
         $photo = "<img src=`"players/$($p.num).jpg`" alt=`"$(Esc $p.name)`" loading=`"lazy`">"
       }
     }
-    # 本人の写真がなければ、ギャラリーのプレー写真を切り出して使う（players.json の play：src と切り出し位置 cx・top・h）
-    if (-not $photo -and $p.play -and (Test-Path (Join-Path $root $p.play.src))) {
+    # ギャラリーのプレー写真（players.json の play：src と切り出し位置 cx・top・h）
+    # カードはプレー写真を優先し、本人の写真（白背景）はプロフィールの中で見せる
+    $playPhoto = ''
+    if ($p.play -and (Test-Path (Join-Path $root $p.play.src))) {
       New-Item -ItemType Directory -Force $playerOut | Out-Null
       $im = [System.Drawing.Image]::FromFile((Join-Path $root $p.play.src))
       try {
@@ -688,11 +690,13 @@ foreach ($pos in $posNames.Keys) {
         $gr.DrawImage($im, (New-Object System.Drawing.Rectangle 0, 0, 750, 1000), (New-Object System.Drawing.Rectangle $cx, $cy, $cw, $ch), [System.Drawing.GraphicsUnit]::Pixel)
         $ep = New-Object System.Drawing.Imaging.EncoderParameters(1)
         $ep.Param[0] = New-Object System.Drawing.Imaging.EncoderParameter([System.Drawing.Imaging.Encoder]::Quality, [long]84)
-        $bmp.Save((Join-Path $playerOut "$($p.num).jpg"), $jpegCodec, $ep); $gr.Dispose(); $bmp.Dispose()
+        $bmp.Save((Join-Path $playerOut "$($p.num)-play.jpg"), $jpegCodec, $ep); $gr.Dispose(); $bmp.Dispose()
       } finally { $im.Dispose() }
-      $keepPlayers["$($p.num).jpg"] = $true
-      $photo = "<img class=`"is-play`" src=`"players/$($p.num).jpg`" alt=`"$(Esc $p.name)`" loading=`"lazy`">"
+      $keepPlayers["$($p.num)-play.jpg"] = $true
+      $playPhoto = "<img class=`"is-play`" src=`"players/$($p.num)-play.jpg`" alt=`"$(Esc $p.name)`" loading=`"lazy`">"
     }
+    $profilePhoto = if ($photo) { $photo } else { $playPhoto }
+    if ($playPhoto) { $photo = $playPhoto }
     $note = "$($p.goals)ゴール" + $(if ($p.note) { '・' + $p.note } else { '' })
     $division = if ($p.division) { $p.division } else { $pdata.defaultDivision }
     $divTag = if ($division) { "<span class=`"member-div`">$(Esc $division)</span>" } else { '' }
@@ -709,7 +713,7 @@ foreach ($pos in $posNames.Keys) {
 <dialog class="profile" id="p-$($p.num)" aria-labelledby="p-$($p.num)-name">
   <div class="profile-inner">
     <button type="button" class="profile-close" aria-label="閉じる">×</button>
-    <div class="profile-photo member-photo $kind">$($photo.Replace(' loading="lazy"', ''))<span class="num">$($p.num)</span></div>
+    <div class="profile-photo member-photo $kind">$($profilePhoto.Replace(' loading="lazy"', ''))<span class="num">$($p.num)</span></div>
     <div class="profile-body">
       <p class="$posCls">$pos ・ $($posNames[$pos])</p>
       <h3 id="p-$($p.num)-name">$(Esc $p.name)</h3>
@@ -788,12 +792,14 @@ $membersHtml = ($memberGroups -join "`n`n      ")
 
 # トップページのメンバー：ポジションごとに1人。写真のある選手を優先し、その中で得点の多い順
 $topMembers = foreach ($pos in $posNames.Keys) {
-  $p = @($pdata.players | Where-Object { $_.pos -eq $pos } |
-    Sort-Object @{ Expression = { $keepPlayers.ContainsKey("$($_.num).jpg") }; Descending = $true }, @{ Expression = { [int]$_.goals }; Descending = $true }) | Select-Object -First 1
+  $order = 0
+  $p = @($pdata.players | Where-Object { $_.pos -eq $pos } | ForEach-Object { $_ | Add-Member -NotePropertyName _order -NotePropertyValue ($order++) -Force -PassThru } |
+    Sort-Object @{ Expression = { $keepPlayers.ContainsKey("$($_.num)-play.jpg") -or $keepPlayers.ContainsKey("$($_.num).jpg") }; Descending = $true }, @{ Expression = { [int]$_.goals }; Descending = $true }, @{ Expression = { $_._order } }) | Select-Object -First 1
   if (-not $p) { continue }
   $kind = if ($pos -eq 'GK') { 'gk' } else { 'fp' }
   $posCls = if ($kind -eq 'gk') { 'pos gk' } else { 'pos' }
-  $img = if ($keepPlayers.ContainsKey("$($p.num).jpg")) { "<img src=`"players/$($p.num).jpg`" alt=`"$(Esc $p.name)`" loading=`"lazy`">" } else { '' }
+  $img = if ($keepPlayers.ContainsKey("$($p.num)-play.jpg")) { "<img class=`"is-play`" src=`"players/$($p.num)-play.jpg`" alt=`"$(Esc $p.name)`" loading=`"lazy`">" }
+    elseif ($keepPlayers.ContainsKey("$($p.num).jpg")) { "<img src=`"players/$($p.num).jpg`" alt=`"$(Esc $p.name)`" loading=`"lazy`">" } else { '' }
   $note = "$($p.goals)ゴール" + $(if ($p.note) { '・' + $p.note } else { '' })
   "<a class=`"member`" href=`"members.html`"><div class=`"member-photo $kind`">$img<span class=`"num`">$($p.num)</span></div><div class=`"member-info`"><span class=`"$posCls`">$pos</span><b>$(Esc $p.name)</b><span class=`"note`">$note</span></div></a>"
 }
