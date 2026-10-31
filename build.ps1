@@ -1,4 +1,4 @@
-﻿# _parts/*.html に共通のヘッダー・帯・フッターを付けて、各ページの HTML を作る
+# _parts/*.html に共通のヘッダー・帯・フッターを付けて、各ページの HTML を作る
 # ギャラリーは _data/matches.json と photos/<日付>_<対戦相手>/ から自動で作る
 #   - 写真は縮小して gallery/<日付>/ と gallery/<日付>/thumb/ に書き出す
 #   - 写真がある試合だけアルバムページ（gallery-<日付>.html）を作る
@@ -818,6 +818,43 @@ $topSlides = foreach ($s in $slideData.slides) {
 $topSlidesHtml = ($topSlides -join "`n        ")
 $membersExtra = ($profiles -join "`n") + "`n" + $profileScript
 
+# ---------- 星取表（_data/results-4c.json）----------
+# 行のチームから見た結果。○勝ち・×負け、SOはシュートアウト、不戦は不戦勝・不戦敗
+$rt = [IO.File]::ReadAllText((Join-Path $root '_data\results-4c.json'), $utf8) | ConvertFrom-Json
+$rtShort = @{ 'FC TRIDENT TOKYO' = 'TRIDENT'; 'PHLCO SC' = 'PHLCO'; 'South Tokyo FC' = 'South Tokyo'; 'Luana All Stars' = 'Luana'; '宮前スカーヴァティー' = '宮前'; 'WELL-BE SOCIETY' = 'WELL-BE'; 'CURIOCITY' = 'CURIOCITY'; 'FC.OXALA' = 'OXALA'; 'FC.全力de蹴球' = '全力de蹴球'; 'FC金沢' = '金沢'; 'Bachelors' = 'Bachelors'; 'CK UNITED' = 'CK UNITED' }
+$rtHead = ($rt.order | ForEach-Object { $us = if ($_ -eq 'FC TRIDENT TOKYO') { ' class="us"' } else { '' }; "<th$us scope=`"col`"><img src=`"$($rt.logos.$_)`" alt=`"`"><span>$(Esc $rtShort[$_])</span></th>" }) -join ''
+$rtRows = foreach ($row in $rt.order) {
+  $cells = foreach ($col in $rt.order) {
+    if ($row -eq $col) { '<td class="rt-self" aria-label="同じチーム"></td>'; continue }
+    $m = $rt.matches | Where-Object { ($_.h -eq $row -and $_.a -eq $col) -or ($_.h -eq $col -and $_.a -eq $row) } | Select-Object -First 1
+    if (-not $m) { '<td class="rt-none">－</td>'; continue }
+    $isHome = $m.h -eq $row
+    $my = if ($isHome) { $m.hs } else { $m.as }; $op = if ($isHome) { $m.as } else { $m.hs }
+    $myso = if ($isHome) { $m.hso } else { $m.aso }; $opso = if ($isHome) { $m.aso } else { $m.hso }
+    $win = if ($my -ne $op) { $my -gt $op } else { $myso -gt $opso }
+    $mark = if ($win) { '○' } else { '×' }
+    $cls = if ($win) { 'rt-w' } else { 'rt-l' }
+    $note = ''
+    if ($m.ff) { $note = if ($win) { '<small>不戦勝</small>' } else { '<small>不戦敗</small>' } }
+    elseif ($my -eq $op) { $note = "<small>SO $myso-$opso</small>"; $cls += ' rt-so' }
+    $us = if ($row -eq 'FC TRIDENT TOKYO' -or $col -eq 'FC TRIDENT TOKYO') { ' rt-us' } else { '' }
+    "<td class=`"$cls$us`"><b>$mark</b><span>$my-$op</span>$note</td>"
+  }
+  $usRow = if ($row -eq 'FC TRIDENT TOKYO') { ' class="us"' } else { '' }
+  "<tr$usRow><th scope=`"row`"><span class=`"tname`"><img src=`"$($rt.logos.$row)`" alt=`"`">$(Esc $row)</span></th>$($cells -join '')</tr>"
+}
+$resultsTableHtml = @"
+<div class="table-scroll rt-scroll">
+        <table class="results-table">
+          <thead><tr><th class="rt-corner" scope="col">チーム ＼ 相手</th>$rtHead</tr></thead>
+          <tbody>
+            $($rtRows -join "`n            ")
+          </tbody>
+        </table>
+      </div>
+      <p class="src">左の列のチームから見た結果です。○＝勝ち、×＝負け、SO＝シュートアウト（同点のときのPK戦）。チームは順位の順に並んでいます。出典：<a href="https://football7society.jp/kanto/result/" target="_blank" rel="noopener">F7SL 関東リーグ 日程・結果</a>（$($rt.asOf)時点）</p>
+"@
+
 # ---------- 各ページを書き出す ----------
 $pages = @('index.html') + ($nav | ForEach-Object { $_.file }) + @('privacy.html', '404.html')
 foreach ($file in $pages) {
@@ -830,6 +867,7 @@ foreach ($file in $pages) {
     continue
   }
   $part = [IO.File]::ReadAllText((Join-Path $root "_parts\$file"), $utf8)
+  if ($file -eq 'match.html') { $part = $part.Replace('<!--RESULTS_TABLE-->', $resultsTableHtml) }
   if ($file -eq 'index.html') { $part = $part.Replace('<!--TOP_MEMBERS-->', $topMembersHtml).Replace('<!--TOP_SLIDES-->', $topSlidesHtml) }
   if ($file -eq 'members.html') { $part = $part.Replace('<!--MEMBERS-->', $membersHtml).Replace('</main>', "</main>`n$membersExtra") }
   $m = [regex]::Match($part, '<!-- title: (.+?) -->')
