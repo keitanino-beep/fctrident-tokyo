@@ -1,0 +1,56 @@
+# Instagram に投稿する。HP 更新のたびに投稿案を見せて OK をもらってから、手動で実行する
+# 投稿の中身は _ig/<投稿ID>.json（caption と images）。画像はサイトに公開済みの JPEG
+name: Post to Instagram
+
+on:
+  workflow_dispatch:
+    inputs:
+      post:
+        description: '_ig/ の投稿ID（.json なし）。空なら権限の確認だけ'
+        required: false
+        default: ''
+      mode:
+        description: 'check = 確認だけ（投稿しない） / post = 投稿する'
+        type: choice
+        options:
+          - check
+          - post
+        default: check
+
+permissions:
+  contents: write
+
+concurrency:
+  group: instagram
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Post
+        run: node scripts/post-instagram.mjs
+        env:
+          IG_TOKEN: ${{ secrets.IG_TOKEN }}
+          MODE: ${{ inputs.mode }}
+          POST_ID: ${{ inputs.post }}
+
+      - name: Save result
+        if: inputs.mode == 'post'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add _ig
+          if git diff --cached --quiet; then
+            echo "変更なし"
+          else
+            git commit -m "Instagram: posted ${{ inputs.post }}"
+            git pull --rebase
+            git push
+          fi
