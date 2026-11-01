@@ -26,24 +26,22 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap">
-<link rel="stylesheet" href="style.css?v=5add3590">
+<link rel="stylesheet" href="style.css?v=d42489cc">
 </head>
 <body>
 <header class="site-head">
   <div class="wrap">
-    <a class="brand" href="index.html" aria-label="FC TRIDENT TOKYO トップ">
-      <img class="emblem" src="emblem.webp" alt="">
-      <span class="brand-name">FC TRIDENT<small>TOKYO SOCIETY</small></span>
-    </a>
+    <div class="brand">
+      <a class="brand-emblem" href="index.html" aria-label="TEAM TRIDENT トップ"><img class="emblem" src="emblem.webp" alt=""></a>
+      <span class="brand-name"><a href="index.html">TEAM TRIDENT</a><span class="brand-divs" aria-label="部門"><a class="bd bd-society" href="teams.html#society" aria-current="true">ソサイチ</a><a class="bd bd-football" href="teams.html#football">サッカー</a><a class="bd bd-university" href="teams.html#university">学生ソサイチ</a></span></span>
+    </div>
     <nav class="nav" aria-label="メインメニュー">
       <a href="news.html">News<small>お知らせ</small></a>
-      <a href="match.html">Match<small>試合情報</small></a>
-      <a href="schedule.html" aria-current="page">Schedule<small>活動日程</small></a>
-      <a href="members.html">Members<small>メンバー</small></a>
-      <a href="gallery.html">Gallery<small>ギャラリー</small></a>
+      <div class="nav-drop"><a class="nav-top" href="teams.html#society" aria-current="page">Society<small>ソサイチ部門</small></a><div class="nav-sub"><p class="nav-sub-head">FC Trident Tokyo</p><a href="match.html">試合情報<small>Match</small></a><a href="schedule.html" aria-current="page">活動日程<small>Schedule</small></a><a href="members.html">メンバー<small>Members</small></a><a href="gallery.html">ギャラリー<small>Gallery</small></a></div></div>
+      <div class="nav-drop"><a class="nav-top" href="teams.html#football">Football<small>サッカー部門</small></a><div class="nav-sub"><p class="nav-sub-head">FC Trident Tokyo Football</p><a href="football-match.html">試合情報<small>Match</small></a><a href="football-schedule.html">活動日程<small>Schedule</small></a><a href="football-members.html">メンバー<small>Members</small></a><a href="football-gallery.html">ギャラリー<small>Gallery</small></a></div></div>
+      <div class="nav-drop"><a class="nav-top" href="teams.html#university">University<small>学生ソサイチ部門</small></a><div class="nav-sub"><p class="nav-sub-head">FC Trident Tokyo University</p><a href="university-match.html">試合情報<small>Match</small></a><a href="university-schedule.html">活動日程<small>Schedule</small></a><a href="university-members.html">メンバー<small>Members</small></a><a href="university-gallery.html">ギャラリー<small>Gallery</small></a></div></div>
       <a href="recruit.html">Recruit<small>選手募集</small></a>
       <a href="club.html">Club<small>クラブ概要</small></a>
-      <a href="contact.html">Contact<small>お問い合わせ</small></a>
       <a class="nav-cta" href="sponsor.html">Partner<small>スポンサー募集</small></a>
     </nav>
     <details class="menu">
@@ -51,10 +49,9 @@
       <div class="menu-panel">
         <a href="index.html">トップ</a>
         <a href="news.html">お知らせ</a>
-        <a href="match.html">試合情報</a>
-        <a href="schedule.html" aria-current="page">活動日程</a>
-        <a href="members.html">メンバー</a>
-        <a href="gallery.html">ギャラリー</a>
+        <div class="menu-group mg-society"><a class="menu-group-head" href="teams.html#society">ソサイチ部門<small>FC Trident Tokyo</small></a><div class="menu-subs"><a class="menu-sub" href="match.html"><small>MATCH</small>試合情報</a><a class="menu-sub" href="schedule.html" aria-current="page"><small>SCHEDULE</small>活動日程</a><a class="menu-sub" href="members.html"><small>MEMBERS</small>メンバー</a><a class="menu-sub" href="gallery.html"><small>GALLERY</small>ギャラリー</a></div></div>
+        <div class="menu-group mg-football"><a class="menu-group-head" href="teams.html#football">サッカー部門<small>FC Trident Tokyo Football</small></a><div class="menu-subs"><a class="menu-sub" href="football-match.html"><small>MATCH</small>試合情報</a><a class="menu-sub" href="football-schedule.html"><small>SCHEDULE</small>活動日程</a><a class="menu-sub" href="football-members.html"><small>MEMBERS</small>メンバー</a><a class="menu-sub" href="football-gallery.html"><small>GALLERY</small>ギャラリー</a></div></div>
+        <div class="menu-group mg-university"><a class="menu-group-head" href="teams.html#university">学生ソサイチ部門<small>FC Trident Tokyo University</small></a><div class="menu-subs"><a class="menu-sub" href="university-match.html"><small>MATCH</small>試合情報</a><a class="menu-sub" href="university-schedule.html"><small>SCHEDULE</small>活動日程</a><a class="menu-sub" href="university-members.html"><small>MEMBERS</small>メンバー</a><a class="menu-sub" href="university-gallery.html"><small>GALLERY</small>ギャラリー</a></div></div>
         <a href="recruit.html">選手募集</a>
         <a href="club.html">クラブ概要</a>
         <a href="contact.html">お問い合わせ</a>
@@ -64,13 +61,14 @@
   </div>
 </header>
 
+<nav class="div-tabs div-society" aria-label="部門と項目のメニュー"><div class="div-switch"><div class="wrap"><span class="div-switch-label">部門を選ぶ</span><div class="div-switch-links"><a class="ds ds-society" href="schedule.html" aria-current="true"><b>ソサイチ部門</b><small>SOCIETY</small></a><a class="ds ds-football" href="football-schedule.html"><b>サッカー部門</b><small>FOOTBALL</small></a><a class="ds ds-university" href="university-schedule.html"><b>学生ソサイチ部門</b><small>UNIVERSITY</small></a></div></div></div><div class="div-sec"><div class="wrap"><span class="div-sec-name">FC Trident Tokyo</span><div class="div-tabs-links"><a href="match.html"><small>MATCH</small>試合情報</a><a href="schedule.html" aria-current="page"><small>SCHEDULE</small>活動日程</a><a href="members.html"><small>MEMBERS</small>メンバー</a><a href="gallery.html"><small>GALLERY</small>ギャラリー</a></div></div></div></nav>
 <main>
   <section class="page-head">
     <div class="wrap">
       <p class="crumb"><a href="index.html">Top</a> / Schedule</p>
       <p class="eyebrow">Schedule</p>
       <h1>活動日程</h1>
-      <p class="lead">公式戦の日程と結果をまとめています。練習や練習試合の日程も、順次ここに掲載していきます。</p>
+      <p class="lead">ソサイチ部門の公式戦の日程と結果をまとめています。練習や練習試合の日程も、順次ここに掲載していきます。</p>
     </div>
   </section>
 
@@ -90,7 +88,7 @@
               <p class="ev-meta"><span class="ev-time">15:40 KICK OFF</span><span class="ev-place">スリースターフィールド鶴ヶ島</span><span>アウェイ</span></p>
               
             </div>
-            <div class="ev-side"><a class="ev-cal" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=FC%20TRIDENT%20TOKYO%20%E9%96%A2%E6%9D%B1%E3%83%AA%E3%83%BC%E3%82%B0%204%E9%83%A8C%20%E7%AC%AC10%E7%AF%80%20vs%20Bachelors&amp;dates=20261128T154000/20261128T174000&amp;ctz=Asia%2FTokyo&amp;location=%E3%82%B9%E3%83%AA%E3%83%BC%E3%82%B9%E3%82%BF%E3%83%BC%E3%83%95%E3%82%A3%E3%83%BC%E3%83%AB%E3%83%89%E9%B6%B4%E3%83%B6%E5%B3%B6&amp;details=FC%20TRIDENT%20TOKYO%20%E6%B4%BB%E5%8B%95%E6%97%A5%E7%A8%8B%0Ahttps%3A%2F%2Fkeitanino-beep.github.io%2Ffctrident-tokyo%2Fschedule.html" target="_blank" rel="noopener">＋ カレンダーに追加</a><span class="ev-done">終了</span></div>
+            <div class="ev-side"><a class="ev-cal" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=FC%20Trident%20Tokyo%20%E9%96%A2%E6%9D%B1%E3%83%AA%E3%83%BC%E3%82%B0%204%E9%83%A8C%20%E7%AC%AC10%E7%AF%80%20vs%20Bachelors&amp;dates=20261128T154000/20261128T174000&amp;ctz=Asia%2FTokyo&amp;location=%E3%82%B9%E3%83%AA%E3%83%BC%E3%82%B9%E3%82%BF%E3%83%BC%E3%83%95%E3%82%A3%E3%83%BC%E3%83%AB%E3%83%89%E9%B6%B4%E3%83%B6%E5%B3%B6&amp;details=FC%20TRIDENT%20TOKYO%20%E6%B4%BB%E5%8B%95%E6%97%A5%E7%A8%8B%0Ahttps%3A%2F%2Fkeitanino-beep.github.io%2Ffctrident-tokyo%2Fschedule.html" target="_blank" rel="noopener">＋ カレンダーに追加</a><span class="ev-done">終了</span></div>
           </li>
         </ol>
       </section>
@@ -105,7 +103,7 @@
               <p class="ev-meta"><span class="ev-time">15:40 KICK OFF</span><span class="ev-place">スリースターフィールド鶴ヶ島</span><span>アウェイ</span></p>
               
             </div>
-            <div class="ev-side"><a class="ev-cal" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=FC%20TRIDENT%20TOKYO%20%E9%96%A2%E6%9D%B1%E3%83%AA%E3%83%BC%E3%82%B0%204%E9%83%A8C%20%E7%AC%AC11%E7%AF%80%20vs%20PHLCO%20SC&amp;dates=20261219T154000/20261219T174000&amp;ctz=Asia%2FTokyo&amp;location=%E3%82%B9%E3%83%AA%E3%83%BC%E3%82%B9%E3%82%BF%E3%83%BC%E3%83%95%E3%82%A3%E3%83%BC%E3%83%AB%E3%83%89%E9%B6%B4%E3%83%B6%E5%B3%B6&amp;details=FC%20TRIDENT%20TOKYO%20%E6%B4%BB%E5%8B%95%E6%97%A5%E7%A8%8B%0Ahttps%3A%2F%2Fkeitanino-beep.github.io%2Ffctrident-tokyo%2Fschedule.html" target="_blank" rel="noopener">＋ カレンダーに追加</a><span class="ev-done">終了</span></div>
+            <div class="ev-side"><a class="ev-cal" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=FC%20Trident%20Tokyo%20%E9%96%A2%E6%9D%B1%E3%83%AA%E3%83%BC%E3%82%B0%204%E9%83%A8C%20%E7%AC%AC11%E7%AF%80%20vs%20PHLCO%20SC&amp;dates=20261219T154000/20261219T174000&amp;ctz=Asia%2FTokyo&amp;location=%E3%82%B9%E3%83%AA%E3%83%BC%E3%82%B9%E3%82%BF%E3%83%BC%E3%83%95%E3%82%A3%E3%83%BC%E3%83%AB%E3%83%89%E9%B6%B4%E3%83%B6%E5%B3%B6&amp;details=FC%20TRIDENT%20TOKYO%20%E6%B4%BB%E5%8B%95%E6%97%A5%E7%A8%8B%0Ahttps%3A%2F%2Fkeitanino-beep.github.io%2Ffctrident-tokyo%2Fschedule.html" target="_blank" rel="noopener">＋ カレンダーに追加</a><span class="ev-done">終了</span></div>
           </li>
         </ol>
       </section>
@@ -298,14 +296,14 @@
 </section>
 <footer class="site-foot">
   <div class="wrap">
-    <div class="foot-big" aria-hidden="true">FC TRIDENT TOKYO</div>
+    <div class="foot-big" aria-hidden="true">TEAM TRIDENT</div>
     <div class="foot-grid">
       <div>
-        <a class="brand" href="index.html"><img class="emblem" src="emblem.webp" alt=""><span class="brand-name">FC TRIDENT<small>TOKYO SOCIETY</small></span></a>
+        <a class="brand" href="index.html"><img class="emblem" src="emblem.webp" alt=""><span class="brand-name">TEAM TRIDENT<small>SOCIETY ・ FOOTBALL ・ UNIVERSITY</small></span></a>
         <p>活動エリア：東京都（品川区・目黒区・港区周辺）／毎週土日</p>
       </div>
       <nav class="foot-links" aria-label="フッターメニュー">
-        <a href="index.html">トップ</a><a href="news.html">お知らせ</a><a href="match.html">試合情報</a>
+        <a href="index.html">トップ</a><a href="news.html">お知らせ</a><a href="teams.html">3部門</a><a href="match.html">試合情報</a>
         <a href="schedule.html">活動日程</a><a href="members.html">メンバー</a><a href="gallery.html">ギャラリー</a><a href="sponsor.html">スポンサー募集</a>
         <a href="recruit.html">選手募集</a><a href="club.html">クラブ概要</a><a href="contact.html">お問い合わせ</a>
         <a href="https://www.instagram.com/fctridenttokyo_society/" target="_blank" rel="noopener">Instagram</a>

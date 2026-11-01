@@ -914,6 +914,99 @@ fieldset.field { border: 0; padding: 0; margin: 0; }
   .roles { grid-template-columns: minmax(0, 1fr); }
 }
 
+/* 2027年版の試作 */
+.mock-bar { background: var(--yellow); color: var(--ink); text-align: center; font-size: 12px; font-weight: 900; padding: 6px 16px; letter-spacing: .06em; }
+.team-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.team-card {
+  display: grid; gap: 6px; align-content: start; text-decoration: none; color: var(--paper); background: var(--ink-2);
+  padding: 28px 26px; border-top: 4px solid var(--line); min-height: 220px; position: relative;
+  clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 0 100%); transition: transform .2s, background .2s;
+}
+.team-card:hover { transform: translateY(-4px); background: var(--ink-3); }
+.team-card.is-core { border-top-color: var(--red); background: linear-gradient(160deg, rgba(215, 38, 47, .35), var(--ink-2) 70%); }
+.team-card .tc-tag { font-family: var(--font-label); font-weight: 800; font-size: 12px; letter-spacing: .2em; color: var(--yellow); }
+.team-card b { font-family: var(--font-en); font-weight: 400; font-size: 30px; line-height: 1.05; letter-spacing: .02em; }
+.team-card .tc-sub { font-size: 13px; color: var(--muted); font-weight: 700; }
+.team-card .tc-goal { margin-top: auto; padding-top: 16px; font-weight: 900; font-size: 18px; display: grid; }
+.team-card .tc-goal small { font-family: var(--font-label); font-weight: 800; font-size: 11px; letter-spacing: .2em; color: var(--muted); }
+.teams-message { font-weight: 900; font-size: clamp(30px, 5vw, 60px); letter-spacing: .04em; text-align: center; }
+.teams-message em { font-style: normal; color: var(--red); }
+.teams-map { display: flex; justify-content: center; align-items: center; gap: 18px; margin-top: 28px; flex-wrap: wrap; }
+.teams-map span { font-family: var(--font-en); letter-spacing: .06em; padding: 10px 22px; clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); }
+.tm-core { background: var(--red); font-size: 34px; }
+.tm-side { background: var(--ink-3); color: var(--muted); font-size: 22px; }
+.teams-lead { text-align: center; color: var(--muted); font-weight: 700; margin-top: 24px; }
+.division-head { display: flex; align-items: center; gap: 24px; margin-bottom: 36px; }
+.dv-no { font-family: var(--font-en); font-size: 96px; line-height: .8; color: transparent; -webkit-text-stroke: 1.4px var(--red); }
+.dv-tag { font-family: var(--font-label); font-weight: 800; font-size: 13px; letter-spacing: .2em; color: var(--yellow); }
+.division-head h2 { font-family: var(--font-en); font-weight: 400; font-size: clamp(32px, 5vw, 56px); line-height: 1; letter-spacing: .02em; }
+.dv-sub { color: var(--muted); font-weight: 700; font-size: 14px; margin-top: 6px; }
+.division-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 40px; align-items: end; }
+.dv-links { display: grid; gap: 12px; }
+@media (max-width: 1000px) { .team-cards { grid-template-columns: minmax(0, 1fr); } .division-grid { grid-template-columns: minmax(0, 1fr); } }
+.brand-name small { white-space: nowrap; }
+/* 部門ごとのメニュー（パソコン：マウスを乗せる・キーボードで選ぶと開く） */
+.nav-drop { position: relative; }
+.nav-drop > .nav-top::before { content: ""; }
+.nav-drop > .nav-top { padding-right: 22px; }
+.nav-drop > .nav-top small::after { content: " ▾"; color: var(--red); }
+.nav-sub {
+  position: absolute; left: 50%; top: 100%; translate: -50% 0; min-width: 230px; padding: 10px 0 8px;
+  background: var(--ink-2); border: 1px solid var(--line); border-top: 3px solid var(--red); box-shadow: 0 24px 48px rgba(0,0,0,.5);
+  display: grid; opacity: 0; visibility: hidden; transform: translateY(6px); transition: opacity .18s, transform .18s, visibility .18s; z-index: 30;
+}
+.nav-drop:hover .nav-sub, .nav-drop:focus-within .nav-sub { opacity: 1; visibility: visible; transform: none; }
+.nav-sub-head { font-family: var(--font-en); font-size: 15px; letter-spacing: .04em; color: var(--yellow); padding: 4px 18px 8px; border-bottom: 1px solid var(--line); margin-bottom: 4px; white-space: nowrap; }
+.nav .nav-sub a { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 9px 18px; font-family: var(--font-jp); font-weight: 700; font-size: 14px; letter-spacing: .04em; text-transform: none; }
+.nav .nav-sub a small { font-family: var(--font-label); font-weight: 800; font-size: 11px; letter-spacing: .14em; color: var(--muted); text-transform: uppercase; }
+.nav .nav-sub a::after { display: none; }
+.nav .nav-sub a:hover, .nav .nav-sub a[aria-current="page"] { background: var(--ink-3); color: var(--yellow); }
+/* スマホのメニュー：部門ごとにまとめる */
+.menu-panel { max-height: calc(100vh - 120px); overflow-y: auto; }
+.menu-group { --c: var(--red); border-bottom: 1px solid var(--line); padding-bottom: 14px; }
+.menu-group.mg-football { --c: var(--yellow); }
+.menu-group.mg-university { --c: var(--green); }
+.menu-panel a.menu-group-head { display: grid; gap: 2px; border-bottom: 0; margin: 14px 12px 10px; padding: 2px 0 2px 12px; border-left: 4px solid var(--c); color: var(--paper); font-size: 16px; line-height: 1.3; }
+.menu-group-head small { font-family: var(--font-label); font-weight: 800; font-size: 11px; letter-spacing: .14em; color: var(--muted); }
+.menu-subs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0 12px; gap: 6px; }
+.menu-panel a.menu-sub, .menu-panel a.menu-sub:last-child { display: grid; gap: 1px; padding: 8px 12px; border: 1px solid var(--line); background: var(--ink); color: var(--paper); font-size: 14px; line-height: 1.25; }
+.menu-panel a.menu-sub small { font-family: var(--font-label); font-weight: 800; font-size: 10px; letter-spacing: .14em; color: var(--muted); }
+.menu-panel a.menu-sub:hover { border-color: var(--c); }
+.menu-panel a.menu-sub[aria-current="page"] { background: var(--c); border-color: var(--c); color: #fff; }
+.mg-football .menu-panel a.menu-sub[aria-current="page"], .menu-panel .mg-football a.menu-sub[aria-current="page"] { color: var(--ink); }
+.menu-panel a.menu-sub[aria-current="page"] small { color: inherit; opacity: .8; }
+/* 部門のページの上のタブ：上の段で部門を選び、下の段で項目を選ぶ */
+.div-tabs { --dv: var(--red); --dv-ink: #fff; position: sticky; top: 72px; z-index: 15; box-shadow: 0 10px 24px rgba(0,0,0,.45); }
+.div-football { --dv: var(--yellow); --dv-ink: var(--ink); }
+.div-university { --dv: var(--green); --dv-ink: #fff; }
+.div-switch { background: #050404; border-bottom: 1px solid var(--line); }
+.div-switch .wrap { display: flex; align-items: center; gap: 16px; padding-top: 10px; padding-bottom: 10px; }
+.div-switch-label { flex: none; font-weight: 900; font-size: 12px; color: var(--muted); letter-spacing: .08em; }
+.div-switch-links { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; flex: 1; max-width: 720px; }
+.div-switch .ds { --c: var(--red); text-decoration: none; display: grid; gap: 2px; padding: 9px 14px 9px 18px; border: 1px solid var(--line); border-left: 6px solid var(--c); background: var(--ink-2); color: var(--muted); line-height: 1.15; transition: background .15s, color .15s; }
+.div-switch .ds-football { --c: var(--yellow); }
+.div-switch .ds-university { --c: var(--green); }
+.div-switch .ds b { font-weight: 900; font-size: 15px; white-space: nowrap; }
+.div-switch .ds small { font-family: var(--font-label); font-weight: 800; font-size: 11px; letter-spacing: .14em; }
+.div-switch .ds:hover { color: var(--paper); border-color: var(--c); }
+.div-switch .ds[aria-current="true"] { background: var(--c); border-color: var(--c); color: #fff; }
+.div-switch .ds-football[aria-current="true"] { color: var(--ink); }
+.div-sec { background: var(--ink-2); border-bottom: 3px solid var(--dv); }
+.div-sec .wrap { display: flex; align-items: center; gap: 20px; padding-top: 10px; padding-bottom: 10px; }
+.div-sec-name { flex: none; font-family: var(--font-en); font-size: 18px; letter-spacing: .04em; color: var(--dv); }
+.div-tabs-links { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; flex: 1; max-width: 720px; }
+.div-tabs-links a { text-decoration: none; text-align: center; display: grid; gap: 1px; padding: 8px 6px; border: 1px solid var(--line); background: var(--ink); color: var(--paper); font-weight: 900; font-size: 15px; line-height: 1.2; white-space: nowrap; transition: border-color .15s; }
+.div-tabs-links a small { font-family: var(--font-label); font-weight: 800; font-size: 11px; letter-spacing: .14em; color: var(--muted); }
+.div-tabs-links a:hover { border-color: var(--dv); }
+.div-tabs-links a[aria-current="page"] { background: var(--dv); border-color: var(--dv); color: var(--dv-ink); }
+.div-tabs-links a[aria-current="page"] small { color: inherit; opacity: .8; }
+.h1-sub { display: block; font-family: var(--font-en); font-weight: 400; font-size: .45em; letter-spacing: .04em; color: var(--muted); margin-top: 8px; }
+.soon-box { border: 1px solid var(--line); background: var(--ink-2); padding: 36px; display: grid; gap: 18px; max-width: 860px; }
+.soon-tag { font-family: var(--font-en); font-size: 40px; letter-spacing: .04em; color: var(--yellow); line-height: 1; }
+.soon-text { font-weight: 700; font-size: 16px; }
+@media (max-width: 640px) { .div-tabs { top: 64px; } .div-switch-label, .div-sec-name { display: none; } .div-switch .wrap, .div-sec .wrap { padding-top: 8px; padding-bottom: 8px; } .div-switch-links, .div-tabs-links { gap: 6px; } .div-switch .ds { padding: 7px 6px 7px 10px; border-left-width: 4px; } .div-switch .ds b { font-size: 12px; } .div-switch .ds small { font-size: 9px; letter-spacing: .08em; } .div-tabs-links a { font-size: 12px; padding: 7px 2px; } .div-tabs-links a small { font-size: 9px; letter-spacing: .08em; } .soon-box { padding: 24px 18px; } }
+@media (max-width: 640px) { .site-head .brand-name small { letter-spacing: .12em; font-size: 9px; } }
+
 /* 選手の写真とプロフィール */
 .member-photo > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
 .member-photo::before { z-index: 1; }
@@ -1068,3 +1161,27 @@ dialog.profile::backdrop { background: rgba(8, 6, 7, .82); backdrop-filter: blur
 }
 
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { transition: none !important; animation: none !important; } }
+.crest-txt { font-family: var(--font-en); font-size: 28px; color: var(--paper); }
+
+/* トップのメンバー：部門タブ（.div-switch .ds と同じ見た目） */
+.tm-tabs { margin-bottom: 24px; max-width: 720px; }
+.tm-tabs .ds { --c: var(--red); font: inherit; cursor: pointer; text-align: left; display: grid; gap: 2px; padding: 10px 14px 10px 18px; border: 1px solid var(--line); border-left: 6px solid var(--c); background: var(--ink-2); color: var(--muted); line-height: 1.15; }
+.tm-tabs .ds-football { --c: var(--yellow); }
+.tm-tabs .ds-university { --c: var(--green); }
+.tm-tabs .ds b { font-weight: 900; font-size: 15px; white-space: nowrap; }
+.tm-tabs .ds small { font-family: var(--font-label); font-weight: 800; font-size: 11px; letter-spacing: .14em; }
+.tm-tabs .ds:hover { color: var(--paper); border-color: var(--c); }
+.tm-tabs .ds[aria-selected="true"] { background: var(--c); border-color: var(--c); color: #fff; }
+.tm-tabs .ds-football[aria-selected="true"] { color: var(--ink); }
+.tm-more { margin-top: 20px; text-align: right; }
+@media (max-width: 640px) { .tm-tabs .ds { padding: 8px 6px 8px 10px; border-left-width: 4px; } .tm-tabs .ds b { font-size: 12px; } .tm-tabs .ds small { font-size: 9px; letter-spacing: .08em; } }
+/* ヘッダーのロゴ下：部門ボタン */
+.brand-emblem { display: flex; text-decoration: none; }
+.brand-name a { color: inherit; text-decoration: none; }
+.brand-divs { display: flex; gap: 6px; margin-top: 6px; }
+.brand-divs .bd { --c: var(--red); font-family: var(--font-jp); font-weight: 700; font-size: 11px; letter-spacing: .04em; line-height: 1; padding: 4px 8px 4px 7px; border: 1px solid var(--line); border-left: 3px solid var(--c); color: var(--paper); background: var(--ink-2); white-space: nowrap; transition: background .15s, color .15s; }
+.brand-divs .bd-football { --c: var(--yellow); }
+.brand-divs .bd-university { --c: var(--green); }
+.brand-divs .bd:hover, .brand-divs .bd[aria-current="true"] { background: var(--c); border-color: var(--c); color: #fff; }
+.brand-divs .bd-football:hover, .brand-divs .bd-football[aria-current="true"] { color: var(--ink); }
+@media (max-width: 640px) { .brand-divs { gap: 4px; margin-top: 5px; } .brand-divs .bd { font-size: 10px; letter-spacing: 0; padding: 3px 5px 3px 5px; border-left-width: 2px; } }

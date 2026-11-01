@@ -9,15 +9,17 @@ if (-not $root) { $root = (Get-Location).Path }
 $utf8 = New-Object System.Text.UTF8Encoding($false)
 Add-Type -AssemblyName System.Drawing
 
+# 2027年版の試作：TEAM TRIDENT（3部門）。お問い合わせはパソコンのメニューから外し、フッターとスマホのメニューに残す
 $nav = @(
   @{ file = 'news.html';    en = 'News';    jp = 'お知らせ' },
+  @{ file = 'teams.html';   en = 'Teams';   jp = '3部門' },
   @{ file = 'match.html';   en = 'Match';   jp = '試合情報' },
   @{ file = 'schedule.html'; en = 'Schedule'; jp = '活動日程' },
   @{ file = 'members.html'; en = 'Members'; jp = 'メンバー' },
   @{ file = 'gallery.html'; en = 'Gallery'; jp = 'ギャラリー' },
   @{ file = 'recruit.html'; en = 'Recruit'; jp = '選手募集' },
   @{ file = 'club.html';    en = 'Club';    jp = 'クラブ概要' },
-  @{ file = 'contact.html'; en = 'Contact'; jp = 'お問い合わせ' },
+  @{ file = 'contact.html'; en = 'Contact'; jp = 'お問い合わせ'; mobileOnly = $true },
   @{ file = 'sponsor.html'; en = 'Partner'; jp = 'スポンサー募集' }
 )
 
@@ -25,22 +27,59 @@ $emblem = '<img class="emblem" src="emblem.webp" alt="">'
 
 function Esc($s) { return [System.Net.WebUtility]::HtmlEncode([string]$s) }
 
+# 部門ごとのメニュー。ソサイチは今のページをそのまま使い、サッカー・学生は準備中のページを作る
+$sections = @(
+  @{ key = 'match';    en = 'Match';    jp = '試合情報' },
+  @{ key = 'schedule'; en = 'Schedule'; jp = '活動日程' },
+  @{ key = 'members';  en = 'Members';  jp = 'メンバー' },
+  @{ key = 'gallery';  en = 'Gallery';  jp = 'ギャラリー' }
+)
+$divisions = @(
+  @{ key = 'society';    en = 'Society';    jp = 'ソサイチ部門';     name = 'FC Trident Tokyo';            prefix = '' },
+  @{ key = 'football';   en = 'Football';   jp = 'サッカー部門';     name = 'FC Trident Tokyo Football';   prefix = 'football-' },
+  @{ key = 'university'; en = 'University'; jp = '学生ソサイチ部門'; name = 'FC Trident Tokyo University'; prefix = 'university-' }
+)
+function Division-Of($file) {
+  if ($file -match '^(football|university)-gallery-') { return ($divisions | Where-Object { $file.StartsWith($_.prefix) -and $_.prefix } | Select-Object -First 1) }
+  if ($file -like 'gallery-*') { return $divisions[0] }
+  foreach ($d in $divisions) { foreach ($s in $sections) { if ("$($d.prefix)$($s.key).html" -eq $file) { return $d } } }
+  return $null
+}
+$menuTop = @(
+  @{ file = 'news.html'; en = 'News'; jp = 'お知らせ' }
+)
+$menuTail = @(
+  @{ file = 'recruit.html'; en = 'Recruit'; jp = '選手募集' },
+  @{ file = 'club.html';    en = 'Club';    jp = 'クラブ概要' },
+  @{ file = 'contact.html'; en = 'Contact'; jp = 'お問い合わせ'; mobileOnly = $true },
+  @{ file = 'sponsor.html'; en = 'Partner'; jp = 'スポンサー募集' }
+)
 function Desktop-Nav($current) {
   $out = @()
-  foreach ($p in $nav) {
-    $cur = ''; if ($p.file -eq $current) { $cur = ' aria-current="page"' }
-    $cls = ''; if ($p.file -eq 'sponsor.html') { $cls = ' class="nav-cta"' }
+  $curDiv = Division-Of $current
+  foreach ($p in $menuTop) { $cur = if ($p.file -eq $current) { ' aria-current="page"' } else { '' }; $out += "<a href=`"$($p.file)`"$cur>$($p.en)<small>$($p.jp)</small></a>" }
+  foreach ($d in $divisions) {
+    $isCur = if ($curDiv -and $curDiv.key -eq $d.key) { ' aria-current="page"' } else { '' }
+    $subs = ($sections | ForEach-Object { $f = "$($d.prefix)$($_.key).html"; $c = if ($f -eq $current) { ' aria-current="page"' } else { '' }; "<a href=`"$f`"$c>$($_.jp)<small>$($_.en)</small></a>" }) -join ''
+    $out += "<div class=`"nav-drop`"><a class=`"nav-top`" href=`"teams.html#$($d.key)`"$isCur>$($d.en)<small>$($d.jp)</small></a><div class=`"nav-sub`"><p class=`"nav-sub-head`">$($d.name)</p>$subs</div></div>"
+  }
+  foreach ($p in $menuTail) {
+    if ($p.mobileOnly) { continue }
+    $cur = if ($p.file -eq $current) { ' aria-current="page"' } else { '' }
+    $cls = if ($p.file -eq 'sponsor.html') { ' class="nav-cta"' } else { '' }
     $out += "<a$cls href=`"$($p.file)`"$cur>$($p.en)<small>$($p.jp)</small></a>"
   }
   return ($out -join "`n      ")
 }
 function Mobile-Nav($current) {
-  $cur = ''; if ($current -eq 'index.html') { $cur = ' aria-current="page"' }
+  $cur = if ($current -eq 'index.html') { ' aria-current="page"' } else { '' }
   $out = @("<a href=`"index.html`"$cur>トップ</a>")
-  foreach ($p in $nav) {
-    $cur = ''; if ($p.file -eq $current) { $cur = ' aria-current="page"' }
-    $out += "<a href=`"$($p.file)`"$cur>$($p.jp)</a>"
+  foreach ($p in $menuTop) { $cur = if ($p.file -eq $current) { ' aria-current="page"' } else { '' }; $out += "<a href=`"$($p.file)`"$cur>$($p.jp)</a>" }
+  foreach ($d in $divisions) {
+    $subs = ($sections | ForEach-Object { $f = "$($d.prefix)$($_.key).html"; $c = if ($f -eq $current) { ' aria-current="page"' } else { '' }; "<a class=`"menu-sub`" href=`"$f`"$c><small>$($_.en.ToUpper())</small>$($_.jp)</a>" }) -join ''
+    $out += "<div class=`"menu-group mg-$($d.key)`"><a class=`"menu-group-head`" href=`"teams.html#$($d.key)`">$($d.jp)<small>$($d.name)</small></a><div class=`"menu-subs`">$subs</div></div>"
   }
+  foreach ($p in $menuTail) { $cur = if ($p.file -eq $current) { ' aria-current="page"' } else { '' }; $out += "<a href=`"$($p.file)`"$cur>$($p.jp)</a>" }
   return ($out -join "`n        ")
 }
 
@@ -102,6 +141,7 @@ $descs = @{
   'recruit.html' = 'FC TRIDENT TOKYOの選手・マネージャー募集。全ポジション募集中。練習参加は何回でもOK、InstagramのDMで応募できます。'
   'privacy.html' = 'FC TRIDENT TOKYOのプライバシーポリシーです。'
   '404.html'     = 'お探しのページが見つかりませんでした。'
+  'teams.html'   = 'TEAM TRIDENTの3部門（FC Trident Tokyo／Football／University）の紹介です。'
 }
 # Google アナリティクス（GA4 の測定 ID。空なら読み込まない）
 $gaId = 'G-H27ZJS6CV7'
@@ -123,13 +163,22 @@ function Write-Page($file, $title, $body, $current, $desc) {
   $band = $join; if ($file -eq 'contact.html') { $band = '' }
   $band = $band + "`n" + $partnerBand
   $body = $body.Replace('<!--SPONSOR_TILES-->', $sponsorTiles)
+  # 部門のページには、その部門のタブ（試合情報・活動日程・メンバー・ギャラリー）を付ける
+  $dv = Division-Of $file
+  if ($dv) {
+    # いま見ている項目（試合情報・活動日程…）。部門を切り替えても同じ項目のページへ
+    $curSec = ($file.Substring($dv.prefix.Length) -replace '-.*$', '' -replace '\.html$', '')
+    $switch = ($divisions | ForEach-Object { $c = if ($_.key -eq $dv.key) { ' aria-current="true"' } else { '' }; "<a class=`"ds ds-$($_.key)`" href=`"$($_.prefix)$curSec.html`"$c><b>$($_.jp)</b><small>$($_.en.ToUpper())</small></a>" }) -join ''
+    $tabs = ($sections | ForEach-Object { $f = "$($dv.prefix)$($_.key).html"; $c = if ($_.key -eq $curSec) { ' aria-current="page"' } else { '' }; "<a href=`"$f`"$c><small>$($_.en.ToUpper())</small>$($_.jp)</a>" }) -join ''
+    $body = "<nav class=`"div-tabs div-$($dv.key)`" aria-label=`"部門と項目のメニュー`"><div class=`"div-switch`"><div class=`"wrap`"><span class=`"div-switch-label`">部門を選ぶ</span><div class=`"div-switch-links`">$switch</div></div></div><div class=`"div-sec`"><div class=`"wrap`"><span class=`"div-sec-name`">$($dv.name)</span><div class=`"div-tabs-links`">$tabs</div></div></div></nav>`n" + $body
+  }
   $inner = @"
 <header class="site-head">
   <div class="wrap">
-    <a class="brand" href="index.html" aria-label="FC TRIDENT TOKYO トップ">
-      $emblem
-      <span class="brand-name">FC TRIDENT<small>TOKYO SOCIETY</small></span>
-    </a>
+    <div class="brand">
+      <a class="brand-emblem" href="index.html" aria-label="TEAM TRIDENT トップ">$emblem</a>
+      <span class="brand-name"><a href="index.html">TEAM TRIDENT</a><span class="brand-divs" aria-label="部門">$(($divisions | ForEach-Object { $c = if ($dv -and $dv.key -eq $_.key) { ' aria-current="true"' } else { '' }; "<a class=`"bd bd-$($_.key)`" href=`"teams.html#$($_.key)`"$c>$($_.jp -replace '部門$', '')</a>" }) -join '')</span></span>
+    </div>
     <nav class="nav" aria-label="メインメニュー">
       $(Desktop-Nav $current)
     </nav>
@@ -147,14 +196,14 @@ $body
 $band
 <footer class="site-foot">
   <div class="wrap">
-    <div class="foot-big" aria-hidden="true">FC TRIDENT TOKYO</div>
+    <div class="foot-big" aria-hidden="true">TEAM TRIDENT</div>
     <div class="foot-grid">
       <div>
-        <a class="brand" href="index.html">$emblem<span class="brand-name">FC TRIDENT<small>TOKYO SOCIETY</small></span></a>
+        <a class="brand" href="index.html">$emblem<span class="brand-name">TEAM TRIDENT<small>SOCIETY ・ FOOTBALL ・ UNIVERSITY</small></span></a>
         <p>活動エリア：東京都（品川区・目黒区・港区周辺）／毎週土日</p>
       </div>
       <nav class="foot-links" aria-label="フッターメニュー">
-        <a href="index.html">トップ</a><a href="news.html">お知らせ</a><a href="match.html">試合情報</a>
+        <a href="index.html">トップ</a><a href="news.html">お知らせ</a><a href="teams.html">3部門</a><a href="match.html">試合情報</a>
         <a href="schedule.html">活動日程</a><a href="members.html">メンバー</a><a href="gallery.html">ギャラリー</a><a href="sponsor.html">スポンサー募集</a>
         <a href="recruit.html">選手募集</a><a href="club.html">クラブ概要</a><a href="contact.html">お問い合わせ</a>
         <a href="https://www.instagram.com/fctridenttokyo_society/" target="_blank" rel="noopener">Instagram</a>
@@ -173,7 +222,7 @@ $band
   # 404 はどの階層の URL でも表示されるので、リンクの基準をサイトの先頭に固定する
   $extraHead = ''
   if ($file -eq '404.html') { $extraHead = "<base href=`"$sitePath`">`n<meta name=`"robots`" content=`"noindex`">" }
-  if ($file -eq 'index.html') { $extraHead = $jsonLd }
+  if ($file -eq 'index.html') { $extraHead += "`n" + $jsonLd }
   $html = @"
 <!doctype html>
 <html lang="ja">
@@ -244,19 +293,47 @@ function Save-Resized($src, $dst, $maxSide) {
   } finally { $img.Dispose() }
 }
 
-# ---------- 試合データ ----------
-$data = [IO.File]::ReadAllText((Join-Path $root '_data\matches.json'), $utf8) | ConvertFrom-Json
+# 部門ページの見出し（パンくず・h1）。ソサイチは今までどおり、ほかの部門は部門名を添える
+function Div-Head($dv, $en, $jp) {
+  if (-not $dv.prefix) { return "<p class=`"crumb`"><a href=`"index.html`">Top</a> / $en</p>`n      <p class=`"eyebrow`">$en</p>`n      <h1>$jp</h1>" }
+  return "<p class=`"crumb`"><a href=`"index.html`">Top</a> / <a href=`"teams.html#$($dv.key)`">$($dv.en)</a> / $en</p>`n      <p class=`"eyebrow`">$en</p>`n      <h1>$jp<span class=`"h1-sub`">$($dv.name)</span></h1>"
+}
+
+# 試合の呼び方：ふだんは「第N節」、大会などは matches.json の label（例：第4試合）
+function RL($m) { if ($m.label) { return [string]$m.label } return "第$($m.round)節" }
+
+# 勝敗。同点でシュートアウト（soUs・soThem）があればその結果で決める
+function Res-Of($m) {
+  if ($null -eq $m.us) { return @('', '') }
+  $a = [int]$m.us; $b = [int]$m.them
+  if ($a -eq $b -and $null -ne $m.soUs) { $a = [int]$m.soUs; $b = [int]$m.soThem }
+  if ($a -gt $b) { return @('WIN', 'w') } elseif ($a -lt $b) { return @('LOSE', 'l') } else { return @('DRAW', 'd') }
+}
+function So-Text($m) { if ($null -ne $m.soUs) { return " (SO $($m.soUs)-$($m.soThem))" } return '' }
+# ---------- 試合データ（部門ごと）----------
+# ソサイチ：_data/matches.json、photos/<日付>_<相手>/ → gallery/<日付>/、gallery-<日付>.html
+# ほかの部門：_data/<部門>/matches.json、photos/<部門>/<日付>_<相手>/ → gallery/<部門>/<日付>/、<部門>-gallery-<日付>.html
 $days = @('日', '月', '火', '水', '木', '金', '土')
-$leagueLine = "$($data.league) $($data.division)"
+$dataBy = @{}; $albumsBy = @{}; $withPhotosBy = @{}; $galleryBodyBy = @{}; $leagueLineBy = @{}
+foreach ($dv in $divisions) {
+$pfx = $dv.prefix
+$dataFile = if ($pfx) { Join-Path $root "_data\$($dv.key)\matches.json" } else { Join-Path $root '_data\matches.json' }
+$data = if (Test-Path $dataFile) { [IO.File]::ReadAllText($dataFile, $utf8) | ConvertFrom-Json } else { [pscustomobject]@{ league = ''; division = ''; matches = @() } }
+$photoBase = if ($pfx) { "photos\$($dv.key)\" } else { 'photos\' }
+$galleryDir = if ($pfx) { "gallery\$($dv.key)\" } else { 'gallery\' }
+$galleryUrl = if ($pfx) { "gallery/$($dv.key)/" } else { 'gallery/' }
+$galleryPage = "$($pfx)gallery.html"
+$leagueLine = "$($data.league) $($data.division)".Trim()
 
 $albums = @()
-foreach ($m in ($data.matches | Where-Object { $null -ne $_.us } | Sort-Object date -Descending)) {
+foreach ($m in (@($data.matches) | Where-Object { $_ -and ($null -ne $_.us -or $_.video -or @(Get-ChildItem (Join-Path $root ("{0}{1}_{2}" -f $photoBase, $_.date, $_.opponent)) -File -ErrorAction SilentlyContinue | Where-Object { $_.Extension -match '^\.(jpe?g|png)$' }).Count) } | Sort-Object date -Descending)) {
   $d = [DateTime]::ParseExact($m.date, 'yyyy-MM-dd', $null)
   $dateLabel = '{0}（{1}）' -f $d.ToString('yyyy.MM.dd'), $days[[int]$d.DayOfWeek]
-  $result = if ($m.us -gt $m.them) { 'WIN' } elseif ($m.us -lt $m.them) { 'LOSE' } else { 'DRAW' }
-  $resCls = @{ WIN = 'w'; LOSE = 'l'; DRAW = 'd' }[$result]
+  $result = (Res-Of $m)[0]
+  $resCls = if ($result) { @{ WIN = 'w'; LOSE = 'l'; DRAW = 'd' }[$result] } else { '' }
+  $scoreTxt = if ($null -eq $m.us) { 'VS' } else { "$($m.us) - $($m.them)$(So-Text $m)" }
 
-  $src = Join-Path $root ("photos\{0}_{1}" -f $m.date, $m.opponent)
+  $src = Join-Path $root ("{0}{1}_{2}" -f $photoBase, $m.date, $m.opponent)
   $photos = @()
   $memo = @{}
   if (Test-Path $src) {
@@ -265,7 +342,7 @@ foreach ($m in ($data.matches | Where-Object { $null -ne $_.us } | Sort-Object d
     $cover = $files | Where-Object { $_.BaseName -ieq 'cover' } | Select-Object -First 1
     if (-not $cover -and $m.cover) { $cover = $files | Where-Object { $_.BaseName -ieq $m.cover } | Select-Object -First 1 }
     if ($cover) { $files = @($cover) + @($files | Where-Object { $_.FullName -ne $cover.FullName }) }
-    $outDir = Join-Path $root "gallery\$($m.date)"
+    $outDir = Join-Path $root "$galleryDir$($m.date)"
     if ($files) { New-Item -ItemType Directory -Force (Join-Path $outDir 'thumb') | Out-Null }
     # 書き出す名前は元のファイル名に合わせる（消したり並べ替えたりしても写真が入れ替わらないように）
     $keep = @{}
@@ -274,7 +351,7 @@ foreach ($m in ($data.matches | Where-Object { $null -ne $_.us } | Sort-Object d
       $keep[$name] = $true
       Save-Resized $f.FullName (Join-Path $outDir $name) 1800
       Save-Resized $f.FullName (Join-Path $outDir "thumb\$name") 640
-      $photos += "gallery/$($m.date)/$name"
+      $photos += "$galleryUrl$($m.date)/$name"
     }
     # photos から消された写真の書き出しを消す
     if (Test-Path $outDir) {
@@ -290,8 +367,8 @@ foreach ($m in ($data.matches | Where-Object { $null -ne $_.us } | Sort-Object d
     }
   }
   $albums += [pscustomobject]@{
-    m = $m; dateLabel = $dateLabel; result = $result; resCls = $resCls; photos = $photos; memo = $memo
-    page = "gallery-$($m.date).html"
+    m = $m; dateLabel = $dateLabel; result = $result; resCls = $resCls; scoreTxt = $scoreTxt; photos = $photos; memo = $memo
+    page = "$($pfx)gallery-$($m.date).html"
   }
 }
 
@@ -304,8 +381,10 @@ for ($k = 0; $k -lt $withPhotos.Count; $k++) {
   $scorers = if ($a.memo['得点']) { $a.memo['得点'] } else { $m.scorers }
   $info = @()
   $info += "<dt>日時</dt><dd>$($a.dateLabel)$(if ($m.kickoff) { ' ' + $m.kickoff + ' KO' })</dd>"
-  $info += "<dt>会場</dt><dd>$(Esc $m.venue)</dd>"
+  if ($m.venue) { $info += "<dt>会場</dt><dd>$(Esc $m.venue)</dd>" }
   if ($m.half) { $info += "<dt>前半 / 後半</dt><dd>$(Esc $m.half)</dd>" }
+  if ($null -ne $m.soUs) { $info += "<dt>シュートアウト</dt><dd>$($m.soUs)-$($m.soThem)</dd>" }
+  if ($m.entryName) { $info += "<dt>大会登録名</dt><dd>$(Esc $m.entryName)</dd>" }
   if ($scorers) { $info += "<dt>得点</dt><dd>$(Esc $scorers)</dd>" }
   $note = if ($a.memo['ひと言']) { "<p class=`"album-note`">$(Esc $a.memo['ひと言'])</p>" } else { '' }
   # 動画（Veo は埋め込み不可のため、表紙＝集合写真の上に再生マークを重ねたリンクにする）
@@ -317,23 +396,23 @@ for ($k = 0; $k -lt $withPhotos.Count; $k++) {
   $grid = ($a.photos | ForEach-Object -Begin { $n = 0 } -Process {
     $n++
     $thumb = $_ -replace '/([^/]+)$', '/thumb/$1'
-    "<button type=`"button`" class=`"photo`" data-full=`"$_`" aria-label=`"写真 $n を拡大`"><img src=`"$thumb`" alt=`"第$($m.round)節 vs $(Esc $m.opponent) の写真 $n`" loading=`"lazy`"></button>"
+    "<button type=`"button`" class=`"photo`" data-full=`"$_`" aria-label=`"写真 $n を拡大`"><img src=`"$thumb`" alt=`"$(RL $m) vs $(Esc $m.opponent) の写真 $n`" loading=`"lazy`"></button>"
   }) -join "`n        "
-  $prev = if ($k -lt $withPhotos.Count - 1) { $p = $withPhotos[$k + 1]; "<a class=`"album-nav-link`" href=`"$($p.page)`">← 第$($p.m.round)節 vs $(Esc $p.m.opponent)</a>" } else { '<span></span>' }
-  $next = if ($k -gt 0) { $p = $withPhotos[$k - 1]; "<a class=`"album-nav-link`" href=`"$($p.page)`">第$($p.m.round)節 vs $(Esc $p.m.opponent) →</a>" } else { '<span></span>' }
+  $prev = if ($k -lt $withPhotos.Count - 1) { $p = $withPhotos[$k + 1]; "<a class=`"album-nav-link`" href=`"$($p.page)`">← $(RL $p.m) vs $(Esc $p.m.opponent)</a>" } else { '<span></span>' }
+  $next = if ($k -gt 0) { $p = $withPhotos[$k - 1]; "<a class=`"album-nav-link`" href=`"$($p.page)`">$(RL $p.m) vs $(Esc $p.m.opponent) →</a>" } else { '<span></span>' }
 
   $body = @"
 <main>
   <section class="page-head album-head">
     <div class="wrap">
-      <p class="crumb"><a href="index.html">Top</a> / <a href="gallery.html">Gallery</a> / Round $($m.round)</p>
+      <p class="crumb"><a href="index.html">Top</a> / $(if ($pfx) { "<a href=`"teams.html#$($dv.key)`">$($dv.en)</a> / " })<a href="$galleryPage">Gallery</a> / Round $($m.round)</p>
       <p class="album-league">$(Esc $leagueLine)</p>
-      <h1 class="album-title">第$($m.round)節<span>vs $(Esc $m.opponent)</span></h1>
+      <h1 class="album-title">$(RL $m)<span>vs $(Esc $m.opponent)</span></h1>
       <div class="album-score">
         <span class="crest us"><img src="emblem.webp" alt=""></span>
-        <span class="score">$($m.us)<span class="dash">-</span>$($m.them)</span>
-        <span class="crest them"><img src="$($m.logo)" alt=""></span>
-        <span class="res $($a.resCls)">$($a.result)</span>
+        $(if ($null -eq $m.us) { '<span class="score">VS</span>' } else { "<span class=`"score`">$($m.us)<span class=`"dash`">-</span>$($m.them)</span>" })
+        <span class="crest them">$(if ($m.logo) { "<img src=`"$($m.logo)`" alt=`"`">" } else { "<b class=`"crest-txt`">$(Esc ($m.opponent.Substring(0, 1)))</b>" })</span>
+        $(if ($a.result) { "<span class=`"res $($a.resCls)`">$($a.result)</span>" })
       </div>
     </div>
   </section>
@@ -344,10 +423,10 @@ for ($k = 0; $k -lt $withPhotos.Count; $k++) {
         $($info -join "`n        ")
       </dl>
       $note
-      <div class="album-actions"><a class="more" href="https://football7society.jp/kanto/event/$($m.event)/" target="_blank" rel="noopener">League record <span class="jp">リーグ公式の試合記録</span></a></div>
+      $(if ($m.event) { "<div class=`"album-actions`"><a class=`"more`" href=`"https://football7society.jp/kanto/event/$($m.event)/`" target=`"_blank`" rel=`"noopener`">League record <span class=`"jp`">リーグ公式の試合記録</span></a></div>" })
       $video
       $(if ($grid) { "<div class=`"photo-grid`">`n        $grid`n      </div>" } else { '<p class="album-empty">この試合の写真は準備中です。</p>' })
-      <nav class="album-nav" aria-label="ほかのアルバム">$prev<a class="album-nav-link" href="gallery.html">アルバム一覧</a>$next</nav>
+      <nav class="album-nav" aria-label="ほかのアルバム">$prev<a class="album-nav-link" href="$galleryPage">アルバム一覧</a>$next</nav>
     </div>
   </section>
 </main>
@@ -394,7 +473,7 @@ for ($k = 0; $k -lt $withPhotos.Count; $k++) {
   })();
 </script>
 "@
-  Write-Page $a.page "第$($m.round)節 vs $($m.opponent)" $body 'gallery.html' "$leagueLine 第$($m.round)節、FC TRIDENT TOKYO vs $($m.opponent)（$($a.dateLabel)、$($m.us)-$($m.them)）の試合写真と試合動画です。"
+  Write-Page $a.page "$(RL $m) vs $($m.opponent)" $body $galleryPage "$leagueLine $(RL $m)、$($dv.name) vs $($m.opponent)（$($a.dateLabel)$(if ($null -ne $m.us) { "、$($m.us)-$($m.them)" })）の試合写真と試合動画です。"
 }
 
 # ---------- ギャラリー一覧 ----------
@@ -402,8 +481,8 @@ $cards = foreach ($a in $albums) {
   $m = $a.m
   $head = @"
 <p class="album-league">$(Esc $leagueLine)</p>
-          <h3 class="album-card-title">第$($m.round)節<span>vs $(Esc $m.opponent)</span></h3>
-          <p class="album-meta"><span class="res $($a.resCls)">$($a.result)</span><span class="album-score-sm">$($m.us) - $($m.them)</span><span>$($a.dateLabel)</span></p>
+          <h3 class="album-card-title">$(RL $m)<span>vs $(Esc $m.opponent)</span></h3>
+          <p class="album-meta">$(if ($a.result) { "<span class=`"res $($a.resCls)`">$($a.result)</span>" })<span class="album-score-sm">$($a.scoreTxt)</span><span>$($a.dateLabel)</span></p>
 "@
   $vbadge = if ($a.memo['動画']) { '<span class="album-video">▶ VIDEO</span>' } else { '' }
   if ($a.photos.Count -gt 0) {
@@ -441,19 +520,15 @@ $galleryBody = @"
 <main>
   <section class="page-head">
     <div class="wrap">
-      <p class="crumb"><a href="index.html">Top</a> / Gallery</p>
-      <p class="eyebrow">Gallery</p>
-      <h1>ギャラリー</h1>
-      <p class="lead">$(Esc $leagueLine)の試合ごとの写真アルバムです。</p>
+      $(Div-Head $dv 'Gallery' 'ギャラリー')
+      <p class="lead">$(if ($leagueLine) { Esc $leagueLine } else { Esc $dv.name })の試合ごとの写真アルバムです。</p>
     </div>
   </section>
 
   <section class="sec">
     <div class="wrap">
       <div class="sec-head"><div><p class="eyebrow">Albums</p><h2>試合アルバム</h2></div></div>
-      <div class="album-grid">
-      $($cards -join "`n      ")
-      </div>
+      $(if (@($cards).Count) { "<div class=`"album-grid`">`n      $($cards -join "`n      ")`n      </div>" } else { "<div class=`"soon-box`"><p class=`"soon-tag`">NO ALBUM YET</p><p class=`"soon-text`">試合が始まったら、試合ごとの写真アルバムと試合動画をここに掲載します。</p></div>" })
       <div class="insta">
         <p><small>INSTAGRAM</small>最新の様子はInstagramで発信しています</p>
         <a class="btn btn-red" href="https://www.instagram.com/fctridenttokyo_society/" target="_blank" rel="noopener">@fctridenttokyo_society <span class="arrow">→</span></a>
@@ -462,6 +537,10 @@ $galleryBody = @"
   </section>
 </main>
 "@
+$dataBy[$dv.key] = $data; $albumsBy[$dv.key] = $albums; $withPhotosBy[$dv.key] = $withPhotos; $galleryBodyBy[$dv.key] = $galleryBody; $leagueLineBy[$dv.key] = $leagueLine
+}
+# ソサイチの値を、このあとの処理（活動日程・サイトマップなど）で使う
+$data = $dataBy['society']; $albums = $albumsBy['society']; $withPhotos = $withPhotosBy['society']; $galleryBody = $galleryBodyBy['society']; $leagueLine = $leagueLineBy['society']
 
 # ---------- 活動日程 ----------
 # 公式戦は matches.json から自動で入れる。練習・練習試合・イベントは _data/schedule.json の events に足す
@@ -471,12 +550,15 @@ $typeInfo = @{
   practice = @{ jp = '練習';     order = 3 }
   event    = @{ jp = 'イベント'; order = 4 }
 }
+$scheduleBodyBy = @{}
+foreach ($dv in $divisions) {
+$pfx = $dv.prefix; $data = $dataBy[$dv.key]; $withPhotos = $withPhotosBy[$dv.key]; $schedPage = "$($pfx)schedule.html"
 $albumByDate = @{}; foreach ($a in $withPhotos) { $albumByDate[$a.m.date] = $a.page }
 $events = @()
-foreach ($m in $data.matches) {
+foreach ($m in @($data.matches)) {
   $events += [pscustomobject]@{
-    date = $m.date; type = 'official'; start = $m.kickoff; end = ''; title = "関東リーグ $($data.division) 第$($m.round)節"
-    opponent = $m.opponent; logo = $m.logo; ha = $m.ha; place = $m.venue; note = ''; us = $m.us; them = $m.them
+    date = $m.date; type = 'official'; start = $m.kickoff; end = ''; title = "$(if ($pfx) { $data.league } else { '関東リーグ' }) $($data.division) $(RL $m)" -replace '\s+', ' ' -replace '^ ', ''
+    opponent = $m.opponent; logo = $m.logo; ha = $m.ha; place = $m.venue; note = ''; us = $m.us; them = $m.them; soUs = $m.soUs; soThem = $m.soThem
     link = $albumByDate[$m.date]
   }
 }
@@ -484,6 +566,8 @@ $schedFile = Join-Path $root '_data\schedule.json'
 if (Test-Path $schedFile) {
   foreach ($e in @(([IO.File]::ReadAllText($schedFile, $utf8) | ConvertFrom-Json).events)) {
     if (-not $e.date) { continue }
+    $evDiv = if ($e.division) { [string]$e.division } else { 'society' }
+    if ($evDiv -ne $dv.key) { continue }
     $type = if ($typeInfo.ContainsKey([string]$e.type)) { [string]$e.type } else { 'event' }
     $events += [pscustomobject]@{
       date = $e.date; type = $type; start = $e.start; end = $e.end; title = $(if ($e.title) { $e.title } else { $typeInfo[$type].jp })
@@ -514,11 +598,13 @@ function Event-Html($e, $isPast) {
   # 右側：終わった試合は結果、これからの予定は「カレンダーに追加」
   $side = ''
   if ($isPast -and $null -ne $e.us -and $null -ne $e.them) {
-    $res = if ($e.us -gt $e.them) { 'WIN', 'w' } elseif ($e.us -lt $e.them) { 'LOSE', 'l' } else { 'DRAW', 'd' }
-    $side = "<span class=`"ev-score`">$($e.us)<span class=`"dash`">-</span>$($e.them)</span><span class=`"res $($res[1])`">$($res[0])</span>"
+    $res = Res-Of $e
+    $side = "<span class=`"ev-score`">$($e.us)<span class=`"dash`">-</span>$($e.them)$(if ($null -ne $e.soUs) { "<small>SO $($e.soUs)-$($e.soThem)</small>" })</span><span class=`"res $($res[1])`">$($res[0])</span>"
     if ($e.link) { $side += "<a class=`"ev-link`" href=`"$($e.link)`">写真・動画</a>" }
+  } elseif ($isPast -and $e.link) {
+    $side = "<a class=`"ev-link`" href=`"$($e.link)`">写真・動画</a>"
   } elseif (-not $isPast) {
-    $text = 'FC TRIDENT TOKYO ' + $e.title + $(if ($e.opponent) { " vs $($e.opponent)" } else { '' })
+    $text = "$($dv.name) " + $e.title + $(if ($e.opponent) { " vs $($e.opponent)" } else { '' })
     if ($e.start) {
       $s = [DateTime]::ParseExact("$($e.date) $($e.start)", 'yyyy-MM-dd HH:mm', $null)
       $f = if ($e.end) { [DateTime]::ParseExact("$($e.date) $($e.end)", 'yyyy-MM-dd HH:mm', $null) } else { $s.AddHours(2) }
@@ -528,7 +614,7 @@ function Event-Html($e, $isPast) {
     }
     $gcal = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + [uri]::EscapeDataString($text) +
       '&dates=' + $dates + '&ctz=Asia%2FTokyo&location=' + [uri]::EscapeDataString([string]$e.place) +
-      '&details=' + [uri]::EscapeDataString("FC TRIDENT TOKYO 活動日程`n${siteUrl}schedule.html")
+      '&details=' + [uri]::EscapeDataString("FC TRIDENT TOKYO 活動日程`n${siteUrl}$schedPage")
     $side = "<a class=`"ev-cal`" href=`"$(Esc $gcal)`" target=`"_blank`" rel=`"noopener`">＋ カレンダーに追加</a><span class=`"ev-done`">終了</span>"
   }
   return @"
@@ -582,16 +668,14 @@ $scheduleBody = @"
 <main>
   <section class="page-head">
     <div class="wrap">
-      <p class="crumb"><a href="index.html">Top</a> / Schedule</p>
-      <p class="eyebrow">Schedule</p>
-      <h1>活動日程</h1>
-      <p class="lead">公式戦の日程と結果をまとめています。練習や練習試合の日程も、順次ここに掲載していきます。</p>
+      $(Div-Head $dv 'Schedule' '活動日程')
+      <p class="lead">$(Esc $dv.jp)の公式戦の日程と結果をまとめています。練習や練習試合の日程も、順次ここに掲載していきます。</p>
     </div>
   </section>
 
   <section class="sec">
     <div class="wrap">
-      <div class="sec-head"><div><p class="eyebrow">Upcoming</p><h2>これからの予定</h2></div><a class="more" href="match.html">Standings <span class="jp">順位表を見る</span></a></div>
+      <div class="sec-head"><div><p class="eyebrow">Upcoming</p><h2>これからの予定</h2></div><a class="more" href="$($pfx)match.html">Standings <span class="jp">順位表を見る</span></a></div>
       $filters
       <div class="ev-months" id="ev-upcoming">
       $upcomingHtml
@@ -630,6 +714,9 @@ $scheduleBody = @"
   })();
 </script>
 "@
+$scheduleBodyBy[$dv.key] = $scheduleBody
+}
+$data = $dataBy['society']; $withPhotos = $withPhotosBy['society']; $scheduleBody = $scheduleBodyBy['society']
 
 # ---------- メンバー（_data/players.json ＋ photos/players/<背番号>_<名前>/）----------
 $pdata = [IO.File]::ReadAllText((Join-Path $root '_data\players.json'), $utf8) | ConvertFrom-Json
@@ -642,9 +729,11 @@ $profLabels = [ordered]@{
 $posNames = [ordered]@{ GK = 'ゴールキーパー'; DF = 'ディフェンダー'; MF = 'ミッドフィルダー'; FW = 'フォワード' }
 $keepPlayers = @{}
 $photoJobs = @()
-$memberGroups = @(); $profiles = @()
+# 所属（"ソサイチ部門" など）で部門ごとに分ける
+$memberGroupsBy = @{}; $profilesBy = @{}
+foreach ($dv in $divisions) { $memberGroupsBy[$dv.key] = @(); $profilesBy[$dv.key] = @() }
 foreach ($pos in $posNames.Keys) {
-  $cards = @()
+  $cardsBy = @{}; foreach ($dv in $divisions) { $cardsBy[$dv.key] = @() }
   foreach ($p in @($pdata.players | Where-Object { $_.pos -eq $pos })) {
     $kind = if ($pos -eq 'GK') { 'gk' } else { 'fp' }
     # 写真：フォルダの main.* を優先、なければファイル名順の1枚目
@@ -700,6 +789,9 @@ foreach ($pos in $posNames.Keys) {
     $note = "$($p.goals)ゴール" + $(if ($p.note) { '・' + $p.note } else { '' })
     $division = if ($p.division) { $p.division } else { $pdata.defaultDivision }
     $divTag = if ($division) { "<span class=`"member-div`">$(Esc $division)</span>" } else { '' }
+    $pdv = $divisions | Where-Object { $_.jp -eq $division } | Select-Object -First 1
+    $divKey = if ($pdv) { $pdv.key } else { 'society' }
+    $goalLine = if ($divKey -eq 'society') { '関東リーグ 4部C' } else { '公式戦' }
     $posCls = if ($kind -eq 'gk') { 'pos gk' } else { 'pos' }
     $open = ''
     if ($p.profile) {
@@ -709,7 +801,7 @@ foreach ($pos in $posNames.Keys) {
       $dl += foreach ($k in $profLabels.Keys) { if ($p.profile.$k) { "<dt>$($profLabels[$k])</dt><dd>$(Esc $p.profile.$k)</dd>" } }
       $msg = if ($p.profile.message) { "<p class=`"profile-msg`">$(Esc $p.profile.message)</p>" } else { '' }
       $nick = if ($p.profile.nickname) { "<p class=`"profile-nick`">$(Esc $p.profile.nickname)</p>" } else { '' }
-      $profiles += @"
+      $profilesBy[$divKey] += @"
 <dialog class="profile" id="p-$($p.num)" aria-labelledby="p-$($p.num)-name">
   <div class="profile-inner">
     <button type="button" class="profile-close" aria-label="閉じる">×</button>
@@ -722,17 +814,20 @@ foreach ($pos in $posNames.Keys) {
       <dl class="profile-dl">
         $($dl -join "`n        ")
       </dl>
-      <p class="profile-goals">関東リーグ 4部C <b>$($p.goals)</b> ゴール<small>（$($pdata.goalsAsOf)時点）</small></p>
+      <p class="profile-goals">$goalLine <b>$($p.goals)</b> ゴール<small>（$($pdata.goalsAsOf)時点）</small></p>
     </div>
   </div>
 </dialog>
 "@
     }
     $soon = if ($p.profile) { '' } else { '<span class="member-soon">PROFILE<b>COMING SOON</b></span>' }
-    $cards += "<article class=`"member$(if ($p.profile) { ' has-profile' })`"><div class=`"member-photo $kind`">$photo<span class=`"num`">$($p.num)</span>$soon</div><div class=`"member-info`"><span class=`"member-tags`"><span class=`"$posCls`">$pos</span>$divTag</span><b>$(Esc $p.name)</b><span class=`"note`">$note</span></div>$open</article>"
+    $cardsBy[$divKey] += "<article class=`"member$(if ($p.profile) { ' has-profile' })`"><div class=`"member-photo $kind`">$photo<span class=`"num`">$($p.num)</span>$soon</div><div class=`"member-info`"><span class=`"member-tags`"><span class=`"$posCls`">$pos</span>$divTag</span><b>$(Esc $p.name)</b><span class=`"note`">$note</span></div>$open</article>"
   }
-  if ($cards.Count) {
-    $memberGroups += "<div class=`"pos-head`"><h2>$pos</h2><span>$($posNames[$pos])</span></div>`n      <div class=`"members`">`n        $($cards -join "`n        ")`n      </div>"
+  foreach ($dv in $divisions) {
+    $cards = $cardsBy[$dv.key]
+    if ($cards.Count) {
+      $memberGroupsBy[$dv.key] += "<div class=`"pos-head`"><h2>$pos</h2><span>$($posNames[$pos])</span></div>`n      <div class=`"members`">`n        $($cards -join "`n        ")`n      </div>"
+    }
   }
 }
 # 背景の切り抜き（_build/rembg-venv があるときだけ。players.json で "cutout": false の選手は元の写真のまま）
@@ -788,23 +883,49 @@ $profileScript = @'
   })();
 </script>
 '@
-$membersHtml = ($memberGroups -join "`n`n      ")
+$membersHtml = ($memberGroupsBy['society'] -join "`n`n      ")
 
-# トップページのメンバー：ポジションごとに1人。写真のある選手を優先し、その中で得点の多い順
-$topMembers = foreach ($pos in $posNames.Keys) {
-  $order = 0
-  $p = @($pdata.players | Where-Object { $_.pos -eq $pos } | ForEach-Object { $_ | Add-Member -NotePropertyName _order -NotePropertyValue ($order++) -Force -PassThru } |
-    Sort-Object @{ Expression = { $keepPlayers.ContainsKey("$($_.num)-play.jpg") -or $keepPlayers.ContainsKey("$($_.num).jpg") }; Descending = $true }, @{ Expression = { [int]$_.goals }; Descending = $true }, @{ Expression = { $_._order } }) | Select-Object -First 1
-  if (-not $p) { continue }
-  $kind = if ($pos -eq 'GK') { 'gk' } else { 'fp' }
-  $posCls = if ($kind -eq 'gk') { 'pos gk' } else { 'pos' }
-  $img = if ($keepPlayers.ContainsKey("$($p.num)-play.jpg")) { "<img class=`"is-play`" src=`"players/$($p.num)-play.jpg`" alt=`"$(Esc $p.name)`" loading=`"lazy`">" }
-    elseif ($keepPlayers.ContainsKey("$($p.num).jpg")) { "<img src=`"players/$($p.num).jpg`" alt=`"$(Esc $p.name)`" loading=`"lazy`">" } else { '' }
-  $note = "$($p.goals)ゴール" + $(if ($p.note) { '・' + $p.note } else { '' })
-  "<a class=`"member`" href=`"members.html`"><div class=`"member-photo $kind`">$img<span class=`"num`">$($p.num)</span></div><div class=`"member-info`"><span class=`"$posCls`">$pos</span><b>$(Esc $p.name)</b><span class=`"note`">$note</span></div></a>"
+# トップページのメンバー：部門ごとのタブで切り替え。各部門ポジションごとに1人（写真のある選手を優先、その中で得点の多い順）
+$topTabs = @(); $topPanels = @()
+foreach ($dv in $divisions) {
+  $divPlayers = @($pdata.players | Where-Object { $d = if ($_.division) { $_.division } else { $pdata.defaultDivision }; $d -eq $dv.jp })
+  $topMembers = foreach ($pos in $posNames.Keys) {
+    $order = 0
+    $p = @($divPlayers | Where-Object { $_.pos -eq $pos } | ForEach-Object { $_ | Add-Member -NotePropertyName _order -NotePropertyValue ($order++) -Force -PassThru } |
+      Sort-Object @{ Expression = { $keepPlayers.ContainsKey("$($_.num)-play.jpg") -or $keepPlayers.ContainsKey("$($_.num).jpg") }; Descending = $true }, @{ Expression = { [int]$_.goals }; Descending = $true }, @{ Expression = { $_._order } }) | Select-Object -First 1
+    if (-not $p) { continue }
+    $kind = if ($pos -eq 'GK') { 'gk' } else { 'fp' }
+    $posCls = if ($kind -eq 'gk') { 'pos gk' } else { 'pos' }
+    $img = if ($keepPlayers.ContainsKey("$($p.num)-play.jpg")) { "<img class=`"is-play`" src=`"players/$($p.num)-play.jpg`" alt=`"$(Esc $p.name)`" loading=`"lazy`">" }
+      elseif ($keepPlayers.ContainsKey("$($p.num).jpg")) { "<img src=`"players/$($p.num).jpg`" alt=`"$(Esc $p.name)`" loading=`"lazy`">" } else { '' }
+    $note = "$($p.goals)ゴール" + $(if ($p.note) { '・' + $p.note } else { '' })
+    "<a class=`"member`" href=`"$($dv.prefix)members.html`"><div class=`"member-photo $kind`">$img<span class=`"num`">$($p.num)</span></div><div class=`"member-info`"><span class=`"$posCls`">$pos</span><b>$(Esc $p.name)</b><span class=`"note`">$note</span></div></a>"
+  }
+  $first = $dv.key -eq 'society'
+  $topTabs += "<button type=`"button`" role=`"tab`" class=`"ds ds-$($dv.key)`" id=`"tm-tab-$($dv.key)`" aria-controls=`"tm-$($dv.key)`" aria-selected=`"$(if ($first) { 'true' } else { 'false' })`"><b>$($dv.jp)</b><small>$($dv.en.ToUpper())</small></button>"
+  $inner = if (@($topMembers).Count) { "<div class=`"members`">`n          $($topMembers -join "`n          ")`n        </div>" } else {
+    "<div class=`"soon-box`"><p class=`"soon-tag`">COMING SOON</p><p class=`"soon-text`">$($dv.jp)のメンバーは、所属が決まりしだい掲載します。</p><div class=`"partner-cta`"><a class=`"btn btn-yellow`" href=`"recruit.html#$($dv.key)`">$($dv.jp)に応募する <span class=`"arrow`">→</span></a></div></div>"
+  }
+  $topPanels += "<div class=`"tm-panel`" role=`"tabpanel`" id=`"tm-$($dv.key)`" aria-labelledby=`"tm-tab-$($dv.key)`"$(if (-not $first) { ' hidden' })>`n        $inner`n        <p class=`"tm-more`"><a class=`"more`" href=`"$($dv.prefix)members.html`">View all <span class=`"jp`">$($dv.jp)の全メンバー</span></a></p>`n      </div>"
 }
-$topMembersHtml = ($topMembers -join "`n        ")
-
+$topMembersHtml = @"
+<div class="tm-tabs div-switch-links" role="tablist" aria-label="部門を選ぶ">$($topTabs -join '')</div>
+      $($topPanels -join "`n      ")
+      <script>
+        (function () {
+          var tabs = document.querySelectorAll('.tm-tabs [role=tab]');
+          Array.prototype.forEach.call(tabs, function (t) {
+            t.addEventListener('click', function () {
+              Array.prototype.forEach.call(tabs, function (x) {
+                var on = x === t;
+                x.setAttribute('aria-selected', String(on));
+                document.getElementById(x.getAttribute('aria-controls')).hidden = !on;
+              });
+            });
+          });
+        })();
+      </script>
+"@
 # トップのカルーセル：中身は _data/slides.json に書く（上から順に表示）
 $slideData = [IO.File]::ReadAllText((Join-Path $root '_data\slides.json'), $utf8) | ConvertFrom-Json
 $slideNo = 0
@@ -816,7 +937,7 @@ $topSlides = foreach ($s in $slideData.slides) {
   "<a class=`"slide`" href=`"$(Esc $s.link)`"><img src=`"$(Esc $s.image)`" alt=`"`" loading=`"$load`" draggable=`"false`"><span class=`"slide-cap`"><small>$(Esc $s.kicker)</small><b>$(Esc $s.title)</b>$text$cta</span></a>"
 }
 $topSlidesHtml = ($topSlides -join "`n        ")
-$membersExtra = ($profiles -join "`n") + "`n" + $profileScript
+$membersExtra = ($profilesBy['society'] -join "`n") + "`n" + $profileScript
 
 # ---------- 星取表（_data/results-4c.json）----------
 # 行のチームから見た結果。○勝ち・×負け、SOはシュートアウト、不戦は不戦勝・不戦敗
@@ -874,9 +995,150 @@ foreach ($file in $pages) {
   Write-Page $file $m.Groups[1].Value $part.Substring($m.Index + $m.Length).Trim() $file $descs[$file]
 }
 
+# ---------- サッカー部門・学生ソサイチ部門のページ ----------
+# ソサイチと同じ作り。試合は _data/<部門>/matches.json（順位は同じファイルの standings）、写真は photos/<部門>/<日付>_<相手>/、
+# 練習などは _data/schedule.json の events に "division": "<部門>" を付ける、選手は players.json の division で分ける
+$league = @{
+  football   = '東京都社会人サッカーリーグ（3部からスタート予定・正式決定前）'
+  university = 'FOOTBALL 7 SOCIETY LEAGUE 関東リーグ（2027年から新チームとして参加）'
+}
+function Match-Card($m, $label, $isNext) {
+  $d = [DateTime]::ParseExact($m.date, 'yyyy-MM-dd', $null)
+  $logo = if ($m.logo) { "<img src=`"$($m.logo)`" alt=`"`">" } else { '' }
+  if ($isNext) {
+    $score = "<div class=`"score time`">$(if ($m.kickoff) { $m.kickoff } else { 'TBA' })<small>KICK OFF</small></div>"
+    $foot = "<span>$($d.Month)月$($d.Day)日（$($days[[int]$d.DayOfWeek])）</span><span>$(Esc $m.venue)</span>"
+  } else {
+    $res = Res-Of $m
+    $score = "<div class=`"score`">$($m.us)<span class=`"dash`">-</span>$($m.them)<small>$(if ($null -ne $m.soUs) { "SO $($m.soUs)-$($m.soThem)" } else { 'FULL TIME' })</small></div>"
+    $foot = "<span class=`"res $($res[1])`">$($res[0])</span><span>$($d.Month)月$($d.Day)日（$($days[[int]$d.DayOfWeek])）</span><span>$(Esc $m.venue)</span>$(if ($m.scorers) { "<span>得点：$(Esc $m.scorers)</span>" })"
+  }
+  $cls = if ($isNext) { 'is-next' } else { 'is-last' }
+  $lcls = if ($isNext) { 'match-label next' } else { 'match-label' }
+  return @"
+<article class="match $cls">
+          <div class="match-top"><span class="$lcls">$label</span><span>$(RL $m)</span></div>
+          <div class="vs">
+            <div class="team"><span class="crest us"><img src="emblem.webp" alt=""></span>$(Esc $dv.name)</div>
+            $score
+            <div class="team"><span class="crest them">$logo</span>$(Esc $m.opponent)</div>
+          </div>
+          <div class="match-foot">$foot</div>
+        </article>
+"@
+}
+foreach ($dv in $divisions | Where-Object { $_.prefix }) {
+  $pfx = $dv.prefix; $data = $dataBy[$dv.key]; $leagueLine = $leagueLineBy[$dv.key]
+  $season = if ($data.season) { "$($data.season)シーズン" } else { '2027シーズン' }
+  $ms = @($data.matches | Where-Object { $_ })
+  $nextM = $ms | Where-Object { $null -eq $_.us -and $_.date -ge (Get-Date).ToString('yyyy-MM-dd') } | Sort-Object date | Select-Object -First 1
+  $lastM = $ms | Where-Object { $null -ne $_.us } | Sort-Object date -Descending | Select-Object -First 1
+  $cardsHtml = @()
+  if ($nextM) { $cardsHtml += Match-Card $nextM 'NEXT MATCH' $true }
+  if ($lastM) { $cardsHtml += Match-Card $lastM 'LAST RESULT' $false }
+  $cardsSec = if ($cardsHtml.Count) { "<div class=`"matches`">`n        $($cardsHtml -join "`n        ")`n      </div>" } else {
+    "<div class=`"soon-box`"><p class=`"soon-tag`">COMING SOON</p><p class=`"soon-text`">$season の日程・結果は、リーグの発表後に掲載します。</p><dl class=`"facts`"><dt>所属リーグ</dt><dd>$($league[$dv.key])</dd></dl><div class=`"partner-cta`"><a class=`"btn btn-yellow`" href=`"recruit.html#$($dv.key)`">$($dv.jp)に応募する <span class=`"arrow`">→</span></a><a class=`"btn btn-line`" href=`"teams.html#$($dv.key)`">部門の紹介 <span class=`"arrow`">→</span></a></div></div>"
+  }
+  $rows = foreach ($m in ($ms | Sort-Object date -Descending)) {
+    $d = [DateTime]::ParseExact($m.date, 'yyyy-MM-dd', $null)
+    $logo = if ($m.logo) { "<img src=`"$($m.logo)`" alt=`"`">" } else { '' }
+    if ($null -ne $m.us) {
+      $res = Res-Of $m
+      $sc = "$($m.us) - $($m.them)$(So-Text $m)"
+    } else { $res = $(if ($m.date -lt (Get-Date).ToString('yyyy-MM-dd')) { '終了', 'n' } else { '予定', 'n' }); $sc = '-' }
+    "<tr><td>$($m.round)</td><td>$($d.ToString('MM/dd'))</td><td>$(if ($m.kickoff) { $m.kickoff } else { '-' })</td><td class=`"txt`"><span class=`"tname`">$logo$(Esc $m.opponent)</span></td><td>$(if ($m.ha) { $m.ha } else { '-' })</td><td class=`"txt`">$(Esc $m.venue)</td><td>$sc</td><td><span class=`"res $($res[1])`">$($res[0])</span></td></tr>"
+  }
+  $schedTable = if (@($rows).Count) { @"
+<div class="table-scroll">
+        <table class="schedule">
+          <thead><tr><th>節</th><th>日付</th><th>KO</th><th class="txt">対戦相手</th><th>H/A</th><th class="txt">会場</th><th>スコア</th><th>結果</th></tr></thead>
+          <tbody>
+            $($rows -join "`n            ")
+          </tbody>
+        </table>
+      </div>
+      <p class="src">スコアは左が$(Esc $dv.name)の得点です。H＝ホーム、A＝アウェイ。</p>
+"@ } else { '<p class="ev-empty">日程はリーグの発表後に掲載します。</p>' }
+  $stRows = foreach ($s in @($data.standings | Where-Object { $_ })) {
+    $us = if ($s.us) { ' class="us"' } else { '' }
+    $logo = if ($s.us) { '<img src="emblem.webp" alt="">' } elseif ($s.logo) { "<img src=`"$($s.logo)`" alt=`"`">" } else { '' }
+    "<tr$us><td>$($s.rank)</td><td class=`"txt`"><span class=`"tname`">$logo$(Esc $s.team)</span></td><td>$($s.p)</td><td>$($s.w)</td><td>$($s.d)</td><td>$($s.l)</td><td>$($s.gf)</td><td>$($s.ga)</td><td>$('{0:+0;-0;0}' -f ([int]$s.gf - [int]$s.ga))</td><td class=`"pts`">$($s.pts)</td></tr>"
+  }
+  $stTable = if (@($stRows).Count) { @"
+<div class="table-scroll">
+        <table class="standings">
+          <thead><tr><th>順位</th><th class="txt">チーム</th><th>試合</th><th>勝</th><th>分</th><th>負</th><th>得点</th><th>失点</th><th>得失点</th><th>勝点</th></tr></thead>
+          <tbody>
+            $($stRows -join "`n            ")
+          </tbody>
+        </table>
+      </div>
+"@ } else { '<p class="ev-empty">順位はシーズンが始まってから掲載します。</p>' }
+  $matchBody = @"
+<main>
+  <section class="page-head">
+    <div class="wrap">
+      $(Div-Head $dv 'Match' '試合情報')
+      <p class="lead">$(if ($leagueLine) { Esc $leagueLine } else { $league[$dv.key] })の日程・結果と順位です。</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap">
+      $cardsSec
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap">
+      <div class="sec-head"><div><p class="eyebrow">Schedule</p><h2>$season 日程・結果</h2></div><a class="more" href="$($pfx)schedule.html">Schedule <span class="jp">活動日程を見る</span></a></div>
+      $schedTable
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap">
+      <div class="sec-head"><div><p class="eyebrow">Standings</p><h2>$season 順位</h2></div></div>
+      $stTable
+    </div>
+  </section>
+</main>
+"@
+  Write-Page "$($pfx)match.html" "試合情報（$($dv.jp)）" $matchBody "$($pfx)match.html" "$($dv.name)の試合情報（日程・結果・順位）です。"
+
+  Write-Page "$($pfx)schedule.html" "活動日程（$($dv.jp)）" $scheduleBodyBy[$dv.key] "$($pfx)schedule.html" "$($dv.name)の公式戦・練習の日程です。"
+
+  $groups = $memberGroupsBy[$dv.key]
+  $membersSec = if ($groups.Count) { $groups -join "`n`n      " } else {
+    "<div class=`"soon-box`"><p class=`"soon-tag`">COMING SOON</p><p class=`"soon-text`">$season のメンバーは、所属が決まりしだい掲載します。選手のカードを押すと、プロフィールが見られるようになります。</p><div class=`"partner-cta`"><a class=`"btn btn-yellow`" href=`"recruit.html#$($dv.key)`">$($dv.jp)に応募する <span class=`"arrow`">→</span></a><a class=`"btn btn-line`" href=`"teams.html#$($dv.key)`">部門の紹介 <span class=`"arrow`">→</span></a></div></div>"
+  }
+  $memBody = @"
+<main>
+  <section class="page-head">
+    <div class="wrap">
+      $(Div-Head $dv 'Members' 'メンバー')
+      <p class="lead">$($dv.jp)で戦う選手とスタッフです。</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap">
+      $membersSec
+    </div>
+  </section>
+</main>
+$($profilesBy[$dv.key] -join "`n")
+$profileScript
+"@
+  Write-Page "$($pfx)members.html" "メンバー（$($dv.jp)）" $memBody "$($pfx)members.html" "$($dv.name)のメンバーです。"
+
+  Write-Page "$($pfx)gallery.html" "ギャラリー（$($dv.jp)）" $galleryBodyBy[$dv.key] "$($pfx)gallery.html" "$($dv.name)の試合ごとの写真アルバムです。"
+
+  $pages += "$($pfx)match.html", "$($pfx)schedule.html", "$($pfx)members.html", "$($pfx)gallery.html"
+}
 # ---------- サイトマップと robots.txt ----------
 $today = (Get-Date).ToString('yyyy-MM-dd')
-$urls = @($pages | Where-Object { $_ -ne '404.html' }) + @($withPhotos | ForEach-Object { $_.page })
+$urls = @($pages | Where-Object { $_ -ne '404.html' }) + @($divisions | ForEach-Object { $withPhotosBy[$_.key] | ForEach-Object { $_.page } })
 $sitemap = "<?xml version=`"1.0`" encoding=`"UTF-8`"?>`n<urlset xmlns=`"http://www.sitemaps.org/schemas/sitemap/0.9`">`n" +
   (($urls | ForEach-Object { $u = if ($_ -eq 'index.html') { $siteUrl } else { $siteUrl + $_ }; "  <url><loc>$u</loc><lastmod>$today</lastmod></url>" }) -join "`n") + "`n</urlset>`n"
 [IO.File]::WriteAllText((Join-Path $root 'sitemap.xml'), $sitemap, $utf8)
