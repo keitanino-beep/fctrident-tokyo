@@ -155,7 +155,7 @@ if ($gaId) {
 
 $jsonLd = @"
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"SportsTeam","name":"FC TRIDENT TOKYO","alternateName":"FCトライデント東京","sport":"Football 7 (ソサイチ)","url":"$siteUrl","logo":"${siteUrl}icon-512.png","foundingDate":"2025","location":{"@type":"Place","name":"東京都"},"memberOf":{"@type":"SportsOrganization","name":"FOOTBALL 7 SOCIETY LEAGUE 関東リーグ"},"sameAs":["https://www.instagram.com/fctridenttokyo_society/","https://football7society.jp/kanto/team/fc-trident-tokyo/"]}
+{"@context":"https://schema.org","@type":"SportsTeam","name":"FC TRIDENT TOKYO","alternateName":"FCトライデント東京","sport":"Football 7 (ソサイチ)","url":"$siteUrl","logo":"${siteUrl}icon-512.png","foundingDate":"2025","location":{"@type":"Place","name":"東京都"},"memberOf":{"@type":"SportsOrganization","name":"FOOTBALL 7 SOCIETY LEAGUE 関東リーグ"},"sameAs":["https://www.instagram.com/fctridenttokyo/","https://football7society.jp/kanto/team/fc-trident-tokyo/"]}
 </script>
 "@
 
@@ -206,7 +206,7 @@ $band
         <a href="index.html">トップ</a><a href="news.html">お知らせ</a><a href="teams.html">3部門</a><a href="match.html">試合情報</a>
         <a href="schedule.html">活動日程</a><a href="members.html">メンバー</a><a href="gallery.html">ギャラリー</a><a href="sponsor.html">スポンサー募集</a>
         <a href="recruit.html">選手募集</a><a href="club.html">クラブ概要</a><a href="contact.html">お問い合わせ</a>
-        <a href="https://www.instagram.com/fctridenttokyo_society/" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://www.instagram.com/fctridenttokyo/" target="_blank" rel="noopener">Instagram</a>
         <a href="privacy.html">プライバシーポリシー</a>
       </nav>
     </div>
@@ -531,7 +531,7 @@ $galleryBody = @"
       $(if (@($cards).Count) { "<div class=`"album-grid`">`n      $($cards -join "`n      ")`n      </div>" } else { "<div class=`"soon-box`"><p class=`"soon-tag`">NO ALBUM YET</p><p class=`"soon-text`">試合が始まったら、試合ごとの写真アルバムと試合動画をここに掲載します。</p></div>" })
       <div class="insta">
         <p><small>INSTAGRAM</small>最新の様子はInstagramで発信しています</p>
-        <a class="btn btn-red" href="https://www.instagram.com/fctridenttokyo_society/" target="_blank" rel="noopener">@fctridenttokyo_society <span class="arrow">→</span></a>
+        <a class="btn btn-red" href="https://www.instagram.com/fctridenttokyo/" target="_blank" rel="noopener">@fctridenttokyo <span class="arrow">→</span></a>
       </div>
     </div>
   </section>
@@ -681,7 +681,7 @@ $scheduleBody = @"
       $upcomingHtml
       </div>
       $pastHtml
-      <p class="src">日時・会場は変更になることがあります。最新の情報は<a href="https://www.instagram.com/fctridenttokyo_society/" target="_blank" rel="noopener">Instagram</a>でもお知らせします。練習に参加したい方は<a href="recruit.html">選手募集</a>をご覧ください。</p>
+      <p class="src">日時・会場は変更になることがあります。最新の情報は<a href="https://www.instagram.com/fctridenttokyo/" target="_blank" rel="noopener">Instagram</a>でもお知らせします。練習に参加したい方は<a href="recruit.html">選手募集</a>をご覧ください。</p>
     </div>
   </section>
 </main>
