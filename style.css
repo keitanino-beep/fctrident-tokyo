@@ -1185,3 +1185,4 @@ dialog.profile::backdrop { background: rgba(8, 6, 7, .82); backdrop-filter: blur
 .brand-divs .bd:hover, .brand-divs .bd[aria-current="true"] { background: var(--c); border-color: var(--c); color: #fff; }
 .brand-divs .bd-football:hover, .brand-divs .bd-football[aria-current="true"] { color: var(--ink); }
 @media (max-width: 640px) { .brand-divs { gap: 4px; margin-top: 5px; } .brand-divs .bd { font-size: 10px; letter-spacing: 0; padding: 3px 5px 3px 5px; border-left-width: 2px; } }
+.album-score .score-txt { font-family: 'Noto Sans JP', sans-serif; font-weight: 900; font-size: 40px; }
