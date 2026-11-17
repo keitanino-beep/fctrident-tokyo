@@ -2,6 +2,6 @@
   "_help": "公式戦は matches.json から自動で載ります。ここには練習・練習試合・イベントを足します。type は practice（練習）/ friendly（練習試合）/ event（イベント）。例: { \"date\": \"2026-11-01\", \"type\": \"practice\", \"start\": \"09:00\", \"end\": \"11:00\", \"place\": \"品川区周辺\", \"note\": \"練習参加OK\" }",
   "events": [
     { "date": "2026-11-21", "type": "friendly", "start": "19:00", "end": "21:00", "title": "TRM（練習試合）", "opponent": "対戦相手 募集中", "place": "リバプール・フットボール・センター・川崎", "note": "練習試合の相手チームを募集中です！ InstagramのDMかお問い合わせフォームからお気軽にご連絡ください。" },
-    { "date": "2026-11-22", "type": "friendly", "start": "19:00", "end": "21:00", "title": "練習試合", "opponent": "FC NOVA", "place": "Z FUTSAL SPORT 松戸流山" }
+    { "date": "2026-11-22", "division": "university", "type": "friendly", "start": "19:00", "end": "21:00", "title": "練習試合", "opponent": "FC NOVA", "place": "Z FUTSAL SPORT 松戸流山" }
   ]
 }
