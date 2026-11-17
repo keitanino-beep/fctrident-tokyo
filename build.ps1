@@ -1052,8 +1052,9 @@ foreach ($dv in $divisions | Where-Object { $_.prefix }) {
     if ($null -ne $m.us) {
       $res = Res-Of $m
       $sc = "$($m.us) - $($m.them)$(So-Text $m)"
-    } else { $res = $(if ($m.date -lt (Get-Date).ToString('yyyy-MM-dd')) { '終了', 'n' } else { '予定', 'n' }); $sc = '-' }
-    "<tr><td>$($m.round)</td><td>$($d.ToString('MM/dd'))</td><td>$(if ($m.kickoff) { $m.kickoff } else { '-' })</td><td class=`"txt`"><span class=`"tname`">$logo$(Esc $m.opponent)</span></td><td>$(if ($m.ha) { $m.ha } else { '-' })</td><td class=`"txt`">$(Esc $m.venue)</td><td>$sc</td><td><span class=`"res $($res[1])`">$($res[0])</span></td></tr>"
+    } elseif ($m.badge) { $res = Res-Of $m; $sc = $(if ($m.scoreText) { Esc $m.scoreText } else { '-' }) }
+    else { $res = $(if ($m.date -lt (Get-Date).ToString('yyyy-MM-dd')) { '終了', 'n' } else { '予定', 'n' }); $sc = '-' }
+    "<tr><td>$(if ($m.label -and -not $m.round) { Esc $m.label } else { $m.round })</td><td>$($d.ToString('MM/dd'))</td><td>$(if ($m.kickoff) { $m.kickoff } else { '-' })</td><td class=`"txt`"><span class=`"tname`">$logo$(Esc $m.opponent)</span></td><td>$(if ($m.ha) { $m.ha } else { '-' })</td><td class=`"txt`">$(Esc $m.venue)</td><td>$sc</td><td><span class=`"res $($res[1])`">$($res[0])</span></td></tr>"
   }
   $schedTable = if (@($rows).Count) { @"
 <div class="table-scroll">
