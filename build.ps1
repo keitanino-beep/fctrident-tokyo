@@ -304,6 +304,7 @@ function RL($m) { if ($m.label) { return [string]$m.label } return "第$($m.roun
 
 # 勝敗。同点でシュートアウト（soUs・soThem）があればその結果で決める
 function Res-Of($m) {
+  if ($m.badge) { return @([string]$m.badge, 'w') }
   if ($null -eq $m.us) { return @('', '') }
   $a = [int]$m.us; $b = [int]$m.them
   if ($a -eq $b -and $null -ne $m.soUs) { $a = [int]$m.soUs; $b = [int]$m.soThem }
@@ -330,8 +331,8 @@ foreach ($m in (@($data.matches) | Where-Object { $_ -and ($null -ne $_.us -or $
   $d = [DateTime]::ParseExact($m.date, 'yyyy-MM-dd', $null)
   $dateLabel = '{0}（{1}）' -f $d.ToString('yyyy.MM.dd'), $days[[int]$d.DayOfWeek]
   $result = (Res-Of $m)[0]
-  $resCls = if ($result) { @{ WIN = 'w'; LOSE = 'l'; DRAW = 'd' }[$result] } else { '' }
-  $scoreTxt = if ($null -eq $m.us) { 'VS' } else { "$($m.us) - $($m.them)$(So-Text $m)" }
+  $resCls = (Res-Of $m)[1]
+  $scoreTxt = if ($m.scoreText) { [string]$m.scoreText } elseif ($null -eq $m.us) { 'VS' } else { "$($m.us) - $($m.them)$(So-Text $m)" }
 
   $src = Join-Path $root ("{0}{1}_{2}" -f $photoBase, $m.date, $m.opponent)
   $photos = @()
@@ -378,6 +379,8 @@ foreach ($a in $albums) { if (-not $a.memo['動画'] -and $a.m.video) { $a.memo[
 $withPhotos = @($albums | Where-Object { $_.photos.Count -gt 0 -or $_.memo['動画'] })
 for ($k = 0; $k -lt $withPhotos.Count; $k++) {
   $a = $withPhotos[$k]; $m = $a.m
+  # 大会などリーグ戦以外は matches.json の league で大会名を差し替える
+  $lg = if ($m.league) { [string]$m.league } else { $leagueLine }
   $scorers = if ($a.memo['得点']) { $a.memo['得点'] } else { $m.scorers }
   $info = @()
   $info += "<dt>日時</dt><dd>$($a.dateLabel)$(if ($m.kickoff) { ' ' + $m.kickoff + ' KO' })</dd>"
@@ -405,12 +408,12 @@ for ($k = 0; $k -lt $withPhotos.Count; $k++) {
 <main>
   <section class="page-head album-head">
     <div class="wrap">
-      <p class="crumb"><a href="index.html">Top</a> / $(if ($pfx) { "<a href=`"teams.html#$($dv.key)`">$($dv.en)</a> / " })<a href="$galleryPage">Gallery</a> / Round $($m.round)</p>
-      <p class="album-league">$(Esc $leagueLine)</p>
+      <p class="crumb"><a href="index.html">Top</a> / $(if ($pfx) { "<a href=`"teams.html#$($dv.key)`">$($dv.en)</a> / " })<a href="$galleryPage">Gallery</a> / $(if ($m.label) { Esc $m.label } else { "Round $($m.round)" })</p>
+      <p class="album-league">$(Esc $lg)</p>
       <h1 class="album-title">$(RL $m)<span>vs $(Esc $m.opponent)</span></h1>
       <div class="album-score">
         <span class="crest us"><img src="emblem.webp" alt=""></span>
-        $(if ($null -eq $m.us) { '<span class="score">VS</span>' } else { "<span class=`"score`">$($m.us)<span class=`"dash`">-</span>$($m.them)</span>" })
+        $(if ($m.scoreText) { "<span class=`"score score-txt`">$(Esc $m.scoreText)</span>" } elseif ($null -eq $m.us) { '<span class="score">VS</span>' } else { "<span class=`"score`">$($m.us)<span class=`"dash`">-</span>$($m.them)</span>" })
         <span class="crest them">$(if ($m.logo) { "<img src=`"$($m.logo)`" alt=`"`">" } else { "<b class=`"crest-txt`">$(Esc ($m.opponent.Substring(0, 1)))</b>" })</span>
         $(if ($a.result) { "<span class=`"res $($a.resCls)`">$($a.result)</span>" })
       </div>
@@ -473,14 +476,15 @@ for ($k = 0; $k -lt $withPhotos.Count; $k++) {
   })();
 </script>
 "@
-  Write-Page $a.page "$(RL $m) vs $($m.opponent)" $body $galleryPage "$leagueLine $(RL $m)、$($dv.name) vs $($m.opponent)（$($a.dateLabel)$(if ($null -ne $m.us) { "、$($m.us)-$($m.them)" })）の試合写真と試合動画です。"
+  Write-Page $a.page "$(RL $m) vs $($m.opponent)" $body $galleryPage "$lg $(RL $m)、$($dv.name) vs $($m.opponent)（$($a.dateLabel)$(if ($null -ne $m.us) { "、$($m.us)-$($m.them)" })）の試合写真と試合動画です。"
 }
 
 # ---------- ギャラリー一覧 ----------
 $cards = foreach ($a in $albums) {
   $m = $a.m
+  $lg = if ($m.league) { [string]$m.league } else { $leagueLine }
   $head = @"
-<p class="album-league">$(Esc $leagueLine)</p>
+<p class="album-league">$(Esc $lg)</p>
           <h3 class="album-card-title">$(RL $m)<span>vs $(Esc $m.opponent)</span></h3>
           <p class="album-meta">$(if ($a.result) { "<span class=`"res $($a.resCls)`">$($a.result)</span>" })<span class="album-score-sm">$($a.scoreTxt)</span><span>$($a.dateLabel)</span></p>
 "@
@@ -556,9 +560,11 @@ $pfx = $dv.prefix; $data = $dataBy[$dv.key]; $withPhotos = $withPhotosBy[$dv.key
 $albumByDate = @{}; foreach ($a in $withPhotos) { $albumByDate[$a.m.date] = $a.page }
 $events = @()
 foreach ($m in @($data.matches)) {
+  # 大会など（league あり）はリーグ名の代わりに大会名、種類は type（なければ公式戦）
+  $title = if ($m.league) { [string]$m.league } else { "$(if ($pfx) { $data.league } else { '関東リーグ' }) $($data.division) $(RL $m)" -replace '\s+', ' ' -replace '^ ', '' }
   $events += [pscustomobject]@{
-    date = $m.date; type = 'official'; start = $m.kickoff; end = ''; title = "$(if ($pfx) { $data.league } else { '関東リーグ' }) $($data.division) $(RL $m)" -replace '\s+', ' ' -replace '^ ', ''
-    opponent = $m.opponent; logo = $m.logo; ha = $m.ha; place = $m.venue; note = ''; us = $m.us; them = $m.them; soUs = $m.soUs; soThem = $m.soThem
+    date = $m.date; type = $(if ($m.type) { [string]$m.type } else { 'official' }); start = $m.kickoff; end = $m.end; title = $title
+    opponent = $m.opponent; logo = $m.logo; ha = $m.ha; place = $m.venue; note = $m.note; us = $m.us; them = $m.them; soUs = $m.soUs; soThem = $m.soThem; badge = $m.badge
     link = $albumByDate[$m.date]
   }
 }
@@ -601,8 +607,9 @@ function Event-Html($e, $isPast) {
     $res = Res-Of $e
     $side = "<span class=`"ev-score`">$($e.us)<span class=`"dash`">-</span>$($e.them)$(if ($null -ne $e.soUs) { "<small>SO $($e.soUs)-$($e.soThem)</small>" })</span><span class=`"res $($res[1])`">$($res[0])</span>"
     if ($e.link) { $side += "<a class=`"ev-link`" href=`"$($e.link)`">写真・動画</a>" }
-  } elseif ($isPast -and $e.link) {
-    $side = "<a class=`"ev-link`" href=`"$($e.link)`">写真・動画</a>"
+  } elseif ($isPast -and ($e.link -or $e.badge)) {
+    if ($e.badge) { $side = "<span class=`"res w`">$(Esc $e.badge)</span>" }
+    if ($e.link) { $side += "<a class=`"ev-link`" href=`"$($e.link)`">写真・動画</a>" }
   } elseif (-not $isPast) {
     $text = "$($dv.name) " + $e.title + $(if ($e.opponent) { " vs $($e.opponent)" } else { '' })
     if ($e.start) {

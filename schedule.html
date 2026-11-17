@@ -26,7 +26,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap">
-<link rel="stylesheet" href="style.css?v=d42489cc">
+<link rel="stylesheet" href="style.css?v=de104142">
 </head>
 <body>
 <header class="site-head">
@@ -75,7 +75,7 @@
   <section class="sec">
     <div class="wrap">
       <div class="sec-head"><div><p class="eyebrow">Upcoming</p><h2>これからの予定</h2></div><a class="more" href="match.html">Standings <span class="jp">順位表を見る</span></a></div>
-      
+      <div class="filters" role="group" aria-label="種類で絞り込む"><button type="button" data-filter="all" aria-pressed="true">すべて</button><button type="button" data-filter="official" aria-pressed="false">公式戦</button><button type="button" data-filter="event" aria-pressed="false">イベント</button></div>
       <div class="ev-months" id="ev-upcoming">
       <section class="ev-month">
         <h3 class="ev-month-head"><b>11</b><span>NOV<small>2026</small></span></h3>
@@ -109,8 +109,23 @@
       </section>
       </div>
       <details class="ev-past">
-        <summary>終了した日程<span>9</span></summary>
+        <summary>終了した日程<span>10</span></summary>
         <section class="ev-month">
+        <h3 class="ev-month-head"><b>11</b><span>NOV<small>2026</small></span></h3>
+        <ol class="ev-list">
+          <li class="ev" data-type="event" data-date="2026-11-15">
+            <div class="ev-date sun"><b>15</b><span>SUN<small>日</small></span></div>
+            <div class="ev-body">
+              <p class="ev-head"><span class="ev-type event">イベント</span><span class="ev-title">LiGA DiVeRTiDA 7人制ソサイチ大会 Lv.3</span></p>
+              <p class="ev-vs"><span class="ev-vs-us"><img src="emblem.webp" alt=""></span><b>VS</b><span>K5・Y.K.フレンズ・立川えりこ</span></p>
+              <p class="ev-meta"><span class="ev-time">15:00〜17:00</span><span class="ev-place">足立西新井ソサイチパーク</span></p>
+              <p class="ev-note">予選リーグ3戦全勝（7得点・1失点）で1位、優勝</p>
+            </div>
+            <div class="ev-side"><span class="res w">優勝</span><a class="ev-link" href="gallery-2026-11-15.html">写真・動画</a></div>
+          </li>
+        </ol>
+      </section>
+      <section class="ev-month">
         <h3 class="ev-month-head"><b>10</b><span>OCT<small>2026</small></span></h3>
         <ol class="ev-list">
           <li class="ev" data-type="official" data-date="2026-10-24">
